@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   <a href="{% url 'clientes:crear-cliente' %}">Crear un nuevo cliente</a>
+   <hr/>
+   <h1>Estos son todos nuestros clientes</h1>
+
+   <table>
+      <tr>
+         <td>Nombre</td>
+         <td>Direccion</td>
+         <td>Correo</td>
+         <td>Frecuencia</td>
+      </tr>
+      {% for cliente in clientes %}
+            <tr>
+               <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
+               <td>{{cliente.direccion}}</td>
+               <td>{{cliente.correo}}</td>
+               <td>{{cliente.frecuencia_meses}}</td>
+            </tr>
+      {% endfor %}
+   </table>
+{% endblock content %}
+

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+   <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
+   <hr />
+   <h1>{{cliente}}</h1>
+   <p>La direccion del cliente es: {{cliente.direccion}}</p>
+   <p>El empleado responsable de este cliente es: {{cliente.empleado}}</p>
+   {% if visitas.count == 0 %}
+      <p>A este cliente nunca se le ha realizado una visita</p>
+   {% else %}
+      <p>La siguiente visita de este cliente esta programada para:</p>
+      <h2>Visitas:</h2>
+      <table>
+         <tr>
+            <td>Fecha</td>
+            <td>Observaciones</td>
+            <td>Edicion</td>
+         </tr>
+         {% for visita in visitas %}
+            <tr>
+               <td>{{visita.fecha}}</td>
+               <td>{{visita.observaciones}}</td>
+               <td><a href="{% url 'clientes:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'clientes:eliminar-visita' visita.pk cliente.pk %}">Eliminar</a></td>
+            </tr>
+         {% endfor %}
+
+      </table>
+
+   {% endif %}
+
+   <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}">Editar</a>
+   <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}">Eliminar</a>
+   <a href="{% url 'clientes:agregar-visita' cliente.pk %}">Agregar visita</a>
+{% endblock content %}
+

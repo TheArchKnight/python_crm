@@ -9,22 +9,28 @@ class Cliente(models.Model):
     nombre_orgnanizacion = models.CharField(max_length=20)
     direccion = models.CharField(max_length=30)
     nit = models.IntegerField()
-    administrador = models.CharField(max_length=25)
     correo = models.EmailField(null=True)
-    observaciones = models.TextField()
-    n_aptos = models.IntegerField(default=1)
-    ultima_visita = models.DateField(null=True)
-    proxima_visita = models.DateField(null=True)
     frecuencia_meses = models.IntegerField(default=1)
-    
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.nombre_orgnanizacion}"
   
 class Empleado(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-
-
-
-
-
     
+    def __str__(self):
+        return self.user.username
+
+class Visita(models.Model):
+    fecha = models.DateField()
+    observaciones = models.TextField()
+    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.fecha}"
+
+
+
+
+   
