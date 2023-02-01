@@ -22,7 +22,7 @@
             <tr>
                <td>{{visita.fecha}}</td>
                <td>{{visita.observaciones}}</td>
-               <td><a href="{% url 'clientes:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'clientes:eliminar-visita' visita.pk cliente.pk %}">Eliminar</a></td>
+               <td><a href="{% url 'visitas:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'visitas:eliminar-visita' visita.pk %}">Eliminar</a></td>
             </tr>
          {% endfor %}
 
@@ -32,6 +32,6 @@
 
    <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}">Editar</a>
    <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}">Eliminar</a>
-   <a href="{% url 'clientes:agregar-visita' cliente.pk %}">Agregar visita</a>
+   <a href="{% url 'visitas:agregar-visita' cliente.pk %}">Agregar visita</a>
 {% endblock content %}
 

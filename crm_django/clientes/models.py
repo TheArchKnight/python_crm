@@ -22,14 +22,6 @@ class Empleado(models.Model):
     def __str__(self):
         return self.user.username
 
-class Visita(models.Model):
-    fecha = models.DateField()
-    observaciones = models.TextField()
-    cliente = models.ForeignKey("Cliente", on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"{self.fecha}"
-
 
 
 

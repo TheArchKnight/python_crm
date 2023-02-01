@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente, Visita
+from .models import Cliente
 
 class ClienteModelForm(forms.ModelForm):
     class Meta:
@@ -13,17 +13,6 @@ class ClienteModelForm(forms.ModelForm):
                 'empleado'
                 )
 
-class VisitaModelForm(forms.ModelForm):
-    class Meta:
-        model = Visita
-        fields=(
-                'fecha',
-                'observaciones'
-                )
-
-class VisitaForm(forms.Form):
-    fecha = forms.DateField()
-    observaciones = forms.CharField(widget=forms.Textarea)
 
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
