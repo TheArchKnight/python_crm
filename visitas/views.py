@@ -34,9 +34,10 @@ def editar_visita(request, pk):
         if form.is_valid():
             form.save()
             return redirect(f"/clientes/{visita.cliente.id}")
-    return render(request, "clientes/editar_visita.html", {
+    return render(request, "visitas/editar_visita.html", {
         "form": form,
-        "visita": visita
+        "visita": visita,
+        "cliente": visita.cliente
         })
 
 def eliminar_visita(request, pk):
