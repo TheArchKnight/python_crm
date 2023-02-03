@@ -1,5 +1,7 @@
 from django import forms
-from .models import Cliente
+from .models import Cliente, User
+from django.contrib.auth.forms import UserCreationForm, UsernameField
+
 
 class ClienteModelForm(forms.ModelForm):
     class Meta:
@@ -29,3 +31,8 @@ class ClienteForm(forms.Form):
     nit = forms.IntegerField()
     email = forms.EmailField()
 
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields=("username",)
+        field_classes = {"username": UsernameField}
