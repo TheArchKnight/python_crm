@@ -12,6 +12,14 @@ class ClienteModelForm(forms.ModelForm):
                 'frecuencia_meses',
                 'empleado'
                 )
+        widgets = {
+                'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
+                'direccion': forms.TextInput(attrs={"class":'form-control'}),
+               'nit': forms.NumberInput(attrs={"class":'form-control'}),
+                'correo': forms.EmailInput(attrs={"class":'form-control'}),
+                'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
+                'empleado': forms.Select(attrs={"class":'form-control'}),
+                }
 
 
 #Deprecated in favor of ClienteModelForm

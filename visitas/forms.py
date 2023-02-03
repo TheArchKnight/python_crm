@@ -7,8 +7,15 @@ class VisitaModelForm(forms.ModelForm):
         model = Visita
         fields=(
                 'fecha',
-                'observaciones'
+                'observaciones',
+                "cliente",
+
                 )
+        widgets={
+                "fecha" : forms.DateInput(attrs={"class": "form-control"}),
+                "observaciones" : forms.Textarea(attrs={"class": "form-control"}),
+                "cliente": forms.Select(attrs={"class": "form-control"})
+                }
 
 class VisitaForm(forms.Form):
     fecha = forms.DateField()

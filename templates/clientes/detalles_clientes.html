@@ -2,36 +2,58 @@
 
 
 {% block content %}
-   <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
-   <hr />
-   <h1>{{cliente}}</h1>
-   <p>La direccion del cliente es: {{cliente.direccion}}</p>
-   <p>El empleado responsable de este cliente es: {{cliente.empleado}}</p>
-   {% if visitas.count == 0 %}
-      <p>A este cliente nunca se le ha realizado una visita</p>
-   {% else %}
-      <p>La siguiente visita de este cliente esta programada para:</p>
-      <h2>Visitas:</h2>
-      <table>
-         <tr>
-            <td>Fecha</td>
-            <td>Observaciones</td>
-            <td>Edicion</td>
-         </tr>
-         {% for visita in visitas %}
-            <tr>
-               <td>{{visita.fecha}}</td>
-               <td>{{visita.observaciones}}</td>
-               <td><a href="{% url 'visitas:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'visitas:eliminar-visita' visita.pk %}">Eliminar</a></td>
-            </tr>
-         {% endfor %}
-
-      </table>
-
-   {% endif %}
-
+   <div class="text-center">   <h1>{{cliente}}</h1>
+   <h2>{{cliente.direccion}}</h2>
    <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}">Editar</a>
    <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}">Eliminar</a>
-   <a href="{% url 'visitas:agregar-visita' cliente.pk %}">Agregar visita</a>
-{% endblock content %}
+</div>
+
+   <hr>
+
+   <div class="row">
+      <div class="col-md-4">
+
+         <h2 class="text-center">Formulario de visitas </h2>
+
+         <form method="post">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit" class="btn btn-success"> Guardar</button>
+         </form>
+
+      </div>
+
+         <div class="col-md-8">
+            <h2 class="text-center">Visitas:</h2>
+
+      {% if visitas.count != 0 %}
+
+            <div class="table-responsive">
+
+               <table class="table table-striped ">
+                  <tr>
+                     <td>Fecha</td>
+                     <td>Observaciones</td>
+                     <td>Edicion</td>
+                  </tr>
+                  {% for visita in visitas %}
+                     <tr>
+                        <td>{{visita.fecha}}</td>
+                        <td>{{visita.observaciones}}</td>
+                        <td><a href="{% url 'visitas:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'visitas:eliminar-visita' visita.pk %}">Eliminar</a></td>
+                     </tr>
+                  {% endfor %}
+
+               </table>
+
+            {% endif %}
+
+
+
+            </div>
+
+         </div>
+         <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
+
+      {% endblock content %}
 

@@ -1,25 +1,32 @@
 {% extends 'base.html' %}
 
 {% block content %}
-   <a href="{% url 'clientes:crear-cliente' %}">Crear un nuevo cliente</a>
-   <hr/>
-   <h1>Estos son todos nuestros clientes</h1>
+   <h1 class="text-center">Estos son todos nuestros clientes</h1>
+   <div class="row">
+      <div class="col-md-12">
+         <div class="table-responsive">
+            <table class="table table-striped">
+               <tr>
+                  <td>Nombre</td>
+                  <td>Direccion</td>
+                  <td>Correo</td>
+                  <td>Frecuencia</td>
+               </tr>
+               {% for cliente in clientes %}
+                  <tr>
+                     <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
+                     <td>{{cliente.direccion}}</td>
+                     <td>{{cliente.correo}}</td>
+                     <td>{{cliente.frecuencia_meses}}</td>
+                  </tr>
+               {% endfor %}
+            </table>
+            <hr/>
 
-   <table>
-      <tr>
-         <td>Nombre</td>
-         <td>Direccion</td>
-         <td>Correo</td>
-         <td>Frecuencia</td>
-      </tr>
-      {% for cliente in clientes %}
-            <tr>
-               <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
-               <td>{{cliente.direccion}}</td>
-               <td>{{cliente.correo}}</td>
-               <td>{{cliente.frecuencia_meses}}</td>
-            </tr>
-      {% endfor %}
-   </table>
+            <a href="{% url 'clientes:crear-cliente' %}">Crear un nuevo cliente</a>
+         </div>
+      </div>
+   </div>
+
 {% endblock content %}
 
