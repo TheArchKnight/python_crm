@@ -26,8 +26,14 @@ class LandingPageView(TemplateView):
 
 class ClienteListView( LoginRequiredMixin ,ListView):
     template_name = "clientes/lista_clientes.html"
-    queryset = Cliente.objects.all()
     context_object_name = "clientes"
+
+    def get_queryset(self):
+        queryset = Cliente.objects.all()
+        if self.request.user.is_agent:
+            queryset = queryset.filter(empleado__user=self.request.user)
+        return queryset
+
 
 
 #This view provides details of the client model, as well as 

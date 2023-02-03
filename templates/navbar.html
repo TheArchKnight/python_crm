@@ -7,8 +7,10 @@
       <div class="collapse navbar-collapse" id="navbarNav">
 
          <div class="navbar-nav">
-            <a class="nav-link active" href="#">Base de datos</a>
-            <a class="nav-link" href="#">Correos</a>
+            <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a>
+            {% if request.user.is_organisor %}
+               <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
+            {% endif %}
          </div>
 
          <div class="navbar-nav ms-auto">

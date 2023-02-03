@@ -11,6 +11,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('clientes/', include('clientes.urls', namespace='clientes')),
     path("visitas/", include("visitas.urls", namespace="visitas")),
+    path("empleados/", include("empleados.urls", namespace="empleados")),
+
     path("", LandingPageView.as_view(), name="lading-page" ),
     path("signup", SingupView.as_view(), name="signup"),
     path("login/", LoginView.as_view(), name="login"),
