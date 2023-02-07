@@ -13,9 +13,8 @@ urlpatterns = [
     path("visitas/", include("visitas.urls", namespace="visitas")),
     path("empleados/", include("empleados.urls", namespace="empleados")),
 
-    path("", LandingPageView.as_view(), name="lading-page" ),
+    path("", LandingPageView.as_view(), name="landing-page" ),
     path("signup", SingupView.as_view(), name="signup"),
-    path("login/", LoginView.as_view(), name="login"),
     path("logout", LogoutView.as_view(), name="logout"),
 ]
 

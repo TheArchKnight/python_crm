@@ -95,16 +95,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+     #   "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+     "NAME": "crm_django.validators.CustomAttributeSimilarityValidator"
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    #    "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    "NAME" : "crm_django.validators.CustomMinimumLengthValidator"
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+#        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    "NAME": "crm_django.validators.CustomCommonPasswordValidator"
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+#        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    "NAME" : "crm_django.validators.CustomNumericPasswordValidator"
     },
 ]
 
@@ -139,4 +143,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'clientes.User'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGIN_REDIRECT_URL = "/clientes"
-LOGIN_URL = "/login"
+LOGIN_URL = "/"

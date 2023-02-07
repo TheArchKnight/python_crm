@@ -1,3 +1,4 @@
 env/
 env.bak/
 crm_django/db.sqlite3
+static/img/

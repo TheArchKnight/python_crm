@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
    <div class="container-fluid">
-      <a class="navbar-brand" href="#">CRM</a>
+      <a class="navbar-brand" href="{% url 'landing-page' %}">CRM</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
          <span class="navbar-toggler-icon"></span>
       </button>
@@ -20,7 +20,6 @@
 
             {% else %}
                <a class="nav-link" href="{% url 'signup' %}">Registrarse</a>
-               <a class ="nav-link" href="{% url 'login' %}">Login</a>
 
 
             {% endif %}
