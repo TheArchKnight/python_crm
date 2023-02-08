@@ -3,10 +3,17 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
+#User class for all of our users. The "type" of user, 
+#is stablished by a forgein key from an instance of the diferent kind of users
+#to this class
 class User(AbstractUser):
     is_organisor = models.BooleanField(default=True)
-    is_agent = models.BooleanField(default=False)
+    fumigacion = models.BooleanField(default=False)
+    inventario = models.BooleanField(default=False)
+    fachadas = models.BooleanField(default=False)
 
+#Users can belong to diferent profiles. For example, working on diferent 
+#fields on the same company
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
@@ -32,9 +39,12 @@ class Empleado(models.Model):
     def __str__(self):
         return self.user.username
 
+#signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwars):
     if created:
         UserProfile.objects.create(user=instance)
+        if instance.fumigacion or instance.fachadas or instance.inventario:
+            Empleado.objects.create(user=instance, organisation = UserProfile.objects.get(user = instance))
 
 post_save.connect(post_user_created_signal, sender=User)
    

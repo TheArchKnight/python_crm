@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
-from django.conf.global_settings import EMAIL_BACKEND, LOGIN_REDIRECT_URL, LOGIN_URL
+from django.conf.global_settings import EMAIL_BACKEND, LOGIN_REDIRECT_URL, LOGIN_URL, LOGOUT_REDIRECT_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -144,3 +144,4 @@ AUTH_USER_MODEL = 'clientes.User'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGIN_REDIRECT_URL = "/clientes"
 LOGIN_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

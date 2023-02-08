@@ -1,14 +1,16 @@
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
+from django.http import request
 from django.shortcuts import redirect, render
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
+from clientes.mixins import EmpleadoRequiredMixin
 from visitas.forms import VisitaForm, VisitaModelForm
 
 #from clientes.forms import ClienteForm
-from .models import Cliente
+from .models import Cliente, Empleado
 from visitas.models import Visita
 from .forms import ClienteModelForm, CustomUserCreationForm, LoginForm
 
@@ -20,23 +22,28 @@ class SingupView(CreateView):
     def get_success_url(self):
         return reverse("landing-page")
     def form_valid(self,form):
-        if form.instance.is_agent == True:
+        if form.instance.fumigacion or form.instance.inventario or form.instance.fachadas:
             form.instance.is_organisor = False
         form.save()
         return super().form_valid(form)
+
 
 class LandingPageView(LoginView):
     form_class = LoginForm  
     template_name = "landing.html"
 
 
-class ClienteListView( LoginRequiredMixin ,ListView):
+class ClienteListView( EmpleadoRequiredMixin ,ListView):
     template_name = "clientes/lista_clientes.html"
     context_object_name = "clientes"
+    
 
+    #Queryset for the clients assigned to the user.
+    #Users with only acces to the inventory are not allowed
+    #to review clients information
     def get_queryset(self):
         queryset = Cliente.objects.all()
-        if self.request.user.is_agent:
+        if self.request.user.fachadas or self.request.user.fumigacion:
             queryset = queryset.filter(empleado__user=self.request.user)
         return queryset
 
@@ -46,7 +53,7 @@ class ClienteListView( LoginRequiredMixin ,ListView):
 #allows the user to create new visits. For this, a creatview class
 #is used, and the context is updated with the necessary data for the forms
 #and the details of data to work.
-class ClienteDetailView(LoginRequiredMixin, CreateView):
+class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
     template_name = "clientes/detalles_clientes.html"
     form_class= VisitaModelForm
     def get_success_url(self):
@@ -68,7 +75,7 @@ class ClienteDetailView(LoginRequiredMixin, CreateView):
         form.instance.cliente = Cliente.objects.get(id=self.kwargs["pk"])
         return super().form_valid(form)
         
-class ClienteCreateView(LoginRequiredMixin, CreateView):
+class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
     template_name = "clientes/crear_cliente.html"
     form_class=ClienteModelForm
 
@@ -82,7 +89,7 @@ class ClienteCreateView(LoginRequiredMixin, CreateView):
                   recipient_list=["test2@test.com"])
         return super(ClienteCreateView, self).form_valid(form)
 
-class ClienteUpdateView(LoginRequiredMixin, UpdateView):
+class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
     template_name = "clientes/actualizar_cliente.html"
     queryset = Cliente.objects.all()
     form_class = ClienteModelForm
@@ -92,7 +99,7 @@ class ClienteUpdateView(LoginRequiredMixin, UpdateView):
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
 
 
-class ClienteDeleteView(LoginRequiredMixin, DeleteView):
+class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
     template_name = "clientes/eliminar_cliente.html"
     queryset = Cliente.objects.all()
 

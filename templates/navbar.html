@@ -7,7 +7,9 @@
       <div class="collapse navbar-collapse" id="navbarNav">
 
          <div class="navbar-nav">
-            <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a>
+            {% if request.user.is_authenticated %}
+               <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a> 
+            {% endif %}
             {% if request.user.is_organisor %}
                <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
             {% endif %}

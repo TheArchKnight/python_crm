@@ -58,15 +58,16 @@ class CustomUserCreationForm(UserCreationForm):
  
     class Meta:
         model = User
-        fields=("username", "is_agent")
+        fields=("username", "fumigacion", "fachadas", "inventario")
         field_classes = {"username": CustomUserNameField}
         labels = {
-                "is_agent": "Empleado",
+                "fumigacion": "Fumigacion",
+                "fachadas": "Fachadas",
+                "inventario": "Inventario",
                 "username": "Nombre de usuario"
                 }
         help_texts = {
                 "username" : "",
-                "password1": ""
                 }
 
 class LoginForm(AuthenticationForm):
