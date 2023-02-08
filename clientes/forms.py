@@ -1,10 +1,32 @@
 from django import forms
 from django.forms import PasswordInput, widgets
-from .models import Cliente, User
+from .models import Cliente, Empleado, User, Visita
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, password_validation
 
 
+class VisitaModelForm(forms.ModelForm):
+    class Meta:
+        model = Visita
+        fields=(
+                'fecha',
+                'observaciones',
+#                "cliente",
+
+                )
+        widgets={
+                "fecha" : forms.DateInput(attrs={"class": "form-control"}),
+                "observaciones" : forms.Textarea(attrs={"class": "form-control"}),
+#                "cliente": forms.Select(attrs={"class": "form-control"})
+                }
+
+class VisitaForm(forms.Form):
+    fecha = forms.DateField(widget=forms.DateInput(attrs={"class":"form-control"}))
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={"class": "form-control", "style":"resize:none"}))
+
+
+
 class ClienteModelForm(forms.ModelForm):
+    fields =()
     class Meta:
         model = Cliente
         fields = (
@@ -13,7 +35,6 @@ class ClienteModelForm(forms.ModelForm):
                 'nit',
                 'correo',
                 'frecuencia_meses',
-                'empleado'
                 )
         widgets = {
                 'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
@@ -21,8 +42,18 @@ class ClienteModelForm(forms.ModelForm):
                 'nit': forms.NumberInput(attrs={"class":'form-control'}),
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
                 'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
-                'empleado': forms.Select(attrs={"class":'form-control'}),
+#               'empleado': forms.Select(attrs={"class":'form-control'}),
                 }
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", 0)
+        super(ClienteModelForm, self).__init__( *args, **kwargs)
+        if user.is_organisor:
+            queryset = Empleado.objects.all()
+            choices = [[i,i] for i in queryset]
+            choices.insert(0, ["---", "---"])
+            self.fields["empleado_field"] = forms.ChoiceField(label="empleado", choices=choices)
+              
+            
 
 
 #Deprecated in favor of ClienteModelForm

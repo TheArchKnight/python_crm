@@ -47,4 +47,13 @@ def post_user_created_signal(sender, instance, created, **kwars):
             Empleado.objects.create(user=instance, organisation = UserProfile.objects.get(user = instance))
 
 post_save.connect(post_user_created_signal, sender=User)
-   
+
+
+class Visita(models.Model):
+    fecha = models.DateField()
+    observaciones = models.TextField()
+    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.fecha}"
+

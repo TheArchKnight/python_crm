@@ -1,17 +1,17 @@
+from re import I
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import request
-from django.shortcuts import redirect, render
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from clientes.mixins import EmpleadoRequiredMixin
-from visitas.forms import VisitaForm, VisitaModelForm
+from .forms import VisitaModelForm
 
 #from clientes.forms import ClienteForm
 from .models import Cliente, Empleado
-from visitas.models import Visita
+from .models import Visita
 from .forms import ClienteModelForm, CustomUserCreationForm, LoginForm
 
 
@@ -66,8 +66,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
         context.update({
             "visitas": Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha"),
             "cliente":Cliente.objects.get(id=self.kwargs["pk"])
-            })
-        
+            }) 
         return context
 
     #Manually setting values for the form
@@ -81,12 +80,20 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse("clientes:lista-cliente")
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         #TODO send email
-        send_mail(subject="Un cliente ha sido creado", 
-                  message="Ve al sitio para ver el cliente", 
-                  from_email="test@test.com",
-                  recipient_list=["test2@test.com"])
+        if self.request.user.is_organisor:
+            empleado_username = form.cleaned_data["empleado_field"]
+            form.instance.empleado = Empleado.objects.filter(user__username = empleado_username).first()
+        else:
+            form.instance.empleado = Empleado.objects.filter(user = self.request.user).first()
+    
         return super(ClienteCreateView, self).form_valid(form)
 
 class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
@@ -98,6 +105,18 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         #The details-client function receives 2 arguments: request and the pk.
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        #TODO send email
+        if self.request.user.is_organisor:
+            empleado_username = form.cleaned_data["empleado_field"]
+            form.instance.empleado = Empleado.objects.filter(user__username = empleado_username).first()
+        return super(ClienteUpdateView, self).form_valid(form) 
+
 
 class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
     template_name = "clientes/eliminar_cliente.html"
@@ -107,6 +126,37 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
         return reverse("clientes:lista-cliente")
 
 
+class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
+    template_name = "visitas/editar_visita.html"
+    queryset = Visita.objects.all()
+    form_class = VisitaModelForm
+    
+    def get_context_data(self, **kwargs):
+        context = super(VisitaUpdateView, self).get_context_data(**kwargs)
+        #Update the context with our necessary queries
+        context.update({
+            "cliente":Cliente.objects.filter(visita = self.kwargs["pk"]).first()
+            })        
+        return context
+
+    def get_success_url(self):
+        return reverse("clientes:detalles-cliente", args=[Cliente.objects.filter(visita = self.kwargs["pk"]).first().id])
+
+
+class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
+    template_name = "visitas/eliminar_visita.html"
+    queryset = Visita.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        context = super(VisitaDeleteView, self).get_context_data(**kwargs)
+        #Update the context with our necessary queries
+        context.update({
+            "cliente":Cliente.objects.filter(visita = self.kwargs["pk"]).first()
+            })        
+        return context
+
+    def get_success_url(self):
+        return reverse("clientes:detalles-cliente", args=[Cliente.objects.filter(visita = self.kwargs["pk"]).first().id])
 
 
 #def eliminar_cliente(request, pk):
