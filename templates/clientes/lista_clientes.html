@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-   <h1 class="text-center">Estos son todos nuestros clientes</h1>
+   {% block titulo %} 
+      <h1 class="text-center">Estos son todos nuestros clientes</h1>
+   {% endblock titulo %}
    <div class="row">
       <div class="col-md-12">
          <div class="table-responsive">

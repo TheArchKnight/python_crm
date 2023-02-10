@@ -2,6 +2,7 @@ from re import I
 from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.http import request
+from django.shortcuts import redirect, render
 
 
 from django.urls import reverse
@@ -31,6 +32,16 @@ class SingupView(CreateView):
 class LandingPageView(LoginView):
     form_class = LoginForm  
     template_name = "landing.html"
+
+    def get(self, request, *args, **kwargs):
+        #Redirect user to the clients app if it's authenticated.
+        if request.user.is_authenticated:
+            if request.user.inventario and not (request.user.fachadas or request.user.fumigacion):
+                return redirect("inventario:lista")
+            else:
+                return redirect("clientes:lista-cliente")
+        return super(LandingPageView, self).get(request, *args, **kwargs)
+
 
 
 class ClienteListView( EmpleadoRequiredMixin ,ListView):
@@ -158,6 +169,13 @@ class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse("clientes:detalles-cliente", args=[Cliente.objects.filter(visita = self.kwargs["pk"]).first().id])
 
+def search_clientes(request):
+    if request.method == "POST":
+        searched = request.POST["searched"]
+        clientes = Cliente.objects.filter(nombre_orgnanizacion__icontains=searched)
+        return render(request, "search_clientes.html", {"searched": searched, "clientes": clientes})
+    else:
+        return render(request, "search_clientes.html", {})
 
 #def eliminar_cliente(request, pk):
 #    cliente = Cliente.objects.get(id=pk)

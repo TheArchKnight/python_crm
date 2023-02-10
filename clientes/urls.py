@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:pk>/eliminar/', ClienteDeleteView.as_view(), name='eliminar-cliente'),
     path('crear/', ClienteCreateView.as_view(), name='crear-cliente'),
     path("<int:pk>/editar/", VisitaUpdateView.as_view(), name="editar-visita"),
-    path("<int:pk>/eliminar_visita/", VisitaDeleteView.as_view(), name="eliminar-visita")
+    path("<int:pk>/eliminar_visita/", VisitaDeleteView.as_view(), name="eliminar-visita"),
+    path("busqueda/", search_clientes, name="search-clientes" )
 #    path('<int:pk>/visitas/', include('visitas.urls', namespace='visitas'))
 ]

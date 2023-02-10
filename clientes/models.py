@@ -16,7 +16,7 @@ class User(AbstractUser):
 #fields on the same company
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    
+     
     def __str__(self):
         return self.user.username
 
@@ -39,6 +39,15 @@ class Empleado(models.Model):
     def __str__(self):
         return self.user.username
 
+class Visita(models.Model):
+    fecha = models.DateField()
+    observaciones = models.TextField()
+    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.fecha}"
+
+
 #signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwars):
     if created:
@@ -49,11 +58,4 @@ def post_user_created_signal(sender, instance, created, **kwars):
 post_save.connect(post_user_created_signal, sender=User)
 
 
-class Visita(models.Model):
-    fecha = models.DateField()
-    observaciones = models.TextField()
-    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
-    
-    def __str__(self):
-        return f"{self.fecha}"
 

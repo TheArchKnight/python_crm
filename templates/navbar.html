@@ -19,6 +19,11 @@
             {% if request.user.is_authenticated %}
                <span class="navbar-text">Perfil: {{request.user.username}}</span> 
                <a class ="mx-3  nav-link" href="{% url 'logout' %}">Logout</a>
+               <form class="d-flex" method="post" action="{% url 'clientes:search-clientes' %}">
+                  {% csrf_token %}
+                  <input class="form-control me-2"type="search" aria-level="Search" name="searched">
+                  <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+               </form>
 
             {% else %}
                <a class="nav-link" href="{% url 'signup' %}">Registrarse</a>
