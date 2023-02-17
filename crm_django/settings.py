@@ -14,6 +14,7 @@ from pathlib import Path
 
 from django.conf.global_settings import EMAIL_BACKEND, LOGIN_REDIRECT_URL, LOGIN_URL, LOGOUT_REDIRECT_URL
 
+from celery.schedules import crontab
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -145,3 +146,13 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 LOGIN_REDIRECT_URL = "/clientes"
 LOGIN_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+
+CELERY_BEAT_SCHEDULE = { # scheduler configuration 
+    'add' : {  # whatever the name you want 
+        'task': 'empleados.tasks.add', # name of task with path
+        'schedule': crontab(), # crontab() runs the tasks every minute
+    },
+}

@@ -2,11 +2,39 @@
 
 
 {% block content %}
+   <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
+
    <div class="text-center">   <h1>{{cliente}}</h1>
-   <h2>{{cliente.direccion}}</h2>
-   <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}">Editar</a>
-   <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}">Eliminar</a>
-</div>
+      <h2>{{cliente.direccion}}</h2>
+      <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}" class="btn btn-warning">Editar</a>
+
+
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+         Eliminar
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+         <div class="modal-dialog">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar cliente</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                  ¿Estas seguro que deseas eliminar el cliente?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}" class="btn btn-danger">Eliminar</a>
+
+               </div>
+            </div>
+         </div>
+      </div>
+
+   </div>
 
    <hr>
 
@@ -23,10 +51,10 @@
 
       </div>
 
-         <div class="col-md-8">
-            <h2 class="text-center">Visitas:</h2>
+      <div class="col-md-8">
+         <h2 class="text-center">Visitas:</h2>
 
-      {% if visitas.count != 0 %}
+         {% if visitas.count != 0 %}
 
             <div class="table-responsive">
 
@@ -34,26 +62,48 @@
                   <tr>
                      <td>Fecha</td>
                      <td>Observaciones</td>
-                     <td>Edicion</td>
+                     <td></td>
                   </tr>
                   {% for visita in visitas %}
                      <tr>
                         <td>{{visita.fecha}}</td>
                         <td>{{visita.observaciones}}</td>
-                        <td><a href="{% url 'clientes:editar-visita' visita.pk%}">Editar</a>/<a href="{% url 'clientes:eliminar-visita' visita.pk %}">Eliminar</a></td>
+                        <td><a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-warning">Editar</a>                      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarVisita">
+                              Eliminar
+                           </button>
+                        </td>
                      </tr>
+
+
+                     <!-- Button trigger modal -->
+
+                     <!-- Modal -->
+                     <div class="modal fade" id="modalEliminarVisita" tabindex="-1" aria-labelledby="modalEliminarVisitaLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                           <div class="modal-content">
+                              <div class="modal-header">
+                                 <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar Visita</h1>
+                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                 ¿Estas seguro que deseas eliminar la visita?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
+                              </div>
+                              <div class="modal-footer">
+                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                 <a href="{% url 'clientes:eliminar-visita' visita.pk %}" class="btn btn-danger">Eliminar</a>
+
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                   {% endfor %}
 
                </table>
 
             {% endif %}
-
-
-
             </div>
 
-         </div>
-         <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
+      </div>
 
-      {% endblock content %}
+   {% endblock content %}
 

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
@@ -28,6 +28,7 @@ class Cliente(models.Model):
     correo = models.EmailField(null=True)
     frecuencia_meses = models.IntegerField(default=1)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
+    fecha_vencimiento = models.DateField(null=True)
 
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
@@ -57,5 +58,6 @@ def post_user_created_signal(sender, instance, created, **kwars):
 
 post_save.connect(post_user_created_signal, sender=User)
 
-
+def pre_cliente_created_signal(sender, instance, *args, **kwargs):
+    instance.fecha_vencimiento
 

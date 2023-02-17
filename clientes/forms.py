@@ -14,7 +14,7 @@ class VisitaModelForm(forms.ModelForm):
 
                 )
         widgets={
-                "fecha" : forms.DateInput(attrs={"class": "form-control"}),
+                "fecha" : forms.DateInput(attrs={"class": "form-control", "type": "date"}),
                 "observaciones" : forms.Textarea(attrs={"class": "form-control"}),
 #                "cliente": forms.Select(attrs={"class": "form-control"})
                 }
@@ -47,6 +47,7 @@ class ClienteModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", 0)
         super(ClienteModelForm, self).__init__( *args, **kwargs)
+        #Verify priviliges to assign clients to certain agents
         if user.is_organisor:
             queryset = Empleado.objects.all()
             choices = [[i,i] for i in queryset]

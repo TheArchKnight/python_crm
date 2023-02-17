@@ -2,13 +2,14 @@
 
 {% block content %}
    {% block titulo %} 
-      <h1 class="text-center">Estos son todos nuestros clientes</h1>
+      <h1 class="text-center">Todos los clientes</h1>
    {% endblock titulo %}
    <div class="row">
       <div class="col-md-12">
          <div class="table-responsive">
             <table class="table table-striped">
                <tr>
+                  <td></td>
                   <td>Nombre</td>
                   <td>Direccion</td>
                   <td>Correo</td>
@@ -16,6 +17,7 @@
                </tr>
                {% for cliente in clientes %}
                   <tr>
+                     <td> <a href="{% url 'clientes:detalles-cliente' cliente.pk %}" class="btn btn-success align-self-lg-center" role="button">Detalles</a> </td>
                      <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
                      <td>{{cliente.direccion}}</td>
                      <td>{{cliente.correo}}</td>
@@ -24,8 +26,10 @@
                {% endfor %}
             </table>
             <hr/>
+            <div class="text-center">
+               <a href="{% url 'clientes:crear-cliente' %}" class="btn btn-success align-self-lg-center" role="button">Crear un nuevo cliente</a>
+            </div> 
 
-            <a href="{% url 'clientes:crear-cliente' %}">Crear un nuevo cliente</a>
          </div>
       </div>
    </div>

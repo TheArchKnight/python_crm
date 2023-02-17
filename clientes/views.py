@@ -1,7 +1,7 @@
 from re import I
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, reverse_lazy
 from django.core.mail import send_mail
-from django.http import request
+from django.http import HttpResponseForbidden, request
 from django.shortcuts import redirect, render
 
 
@@ -130,11 +130,17 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
 
 
 class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
-    template_name = "clientes/eliminar_cliente.html"
-    queryset = Cliente.objects.all()
+
+    model = Cliente
+    http_method_names = ['delete']
+
+    def dispatch(self, request, *args, **kwargs):
+        handler = getattr(self, 'delete')
+        return handler(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse("clientes:lista-cliente")
+        success_url = str(reverse_lazy('clientes:lista-cliente'))
+        return success_url
 
 
 class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
@@ -155,9 +161,16 @@ class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
 
 
 class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
-    template_name = "visitas/eliminar_visita.html"
-    queryset = Visita.objects.all()
-    
+#    template_name = "visitas/eliminar_visita.html"
+#    queryset = Visita.objects.all()
+   
+    model = Visita
+    http_method_names = ['delete']
+
+    def dispatch(self, request, *args, **kwargs):
+        handler = getattr(self, 'delete')
+        return handler(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(VisitaDeleteView, self).get_context_data(**kwargs)
         #Update the context with our necessary queries

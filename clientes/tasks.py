@@ -1,0 +1,6 @@
+from crm_django.celery import app
+from celery.schedules import crontab
+
+@app.task
+def send_notifications():
+    pass
