@@ -11,6 +11,7 @@ class User(AbstractUser):
     fumigacion = models.BooleanField(default=False)
     inventario = models.BooleanField(default=False)
     fachadas = models.BooleanField(default=False)
+    email = models.EmailField(null=False)
 
 #Users can belong to diferent profiles. For example, working on diferent 
 #fields on the same company
@@ -22,13 +23,16 @@ class UserProfile(models.Model):
 
 
 class Cliente(models.Model):
+
+    CHOICES_ESTADO = (("INACTIVO", "Inactivo"), ("POTENCIAL", "Potencial"))
     nombre_orgnanizacion = models.CharField(max_length=20)
     direccion = models.CharField(max_length=30)
     nit = models.IntegerField()
     correo = models.EmailField(null=True)
     frecuencia_meses = models.IntegerField(default=1)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
-    fecha_vencimiento = models.DateField(null=True)
+    fecha_vencimiento = models.DateField(null=True, default=None)
+    estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
 
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
@@ -41,10 +45,12 @@ class Empleado(models.Model):
         return self.user.username
 
 class Visita(models.Model):
+    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
+
     fecha = models.DateField()
     observaciones = models.TextField()
     cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
-    
+    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO)
     def __str__(self):
         return f"{self.fecha}"
 
@@ -58,6 +64,6 @@ def post_user_created_signal(sender, instance, created, **kwars):
 
 post_save.connect(post_user_created_signal, sender=User)
 
-def pre_cliente_created_signal(sender, instance, *args, **kwargs):
-    instance.fecha_vencimiento
+#def pre_cliente_created_signal(sender, instance, *args, **kwargs):
+#    instance.fecha_vencimiento
 

@@ -4,8 +4,20 @@
 {% block content %}
    <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
 
-   <div class="text-center">   <h1>{{cliente}}</h1>
-      <h2>{{cliente.direccion}}</h2>
+   <div class="text-center">   
+      <h1>{{cliente}}</h1>
+      <h3>{{cliente.direccion}}</h3>
+      {% if cliente.estado == "ACTIVO" %}      
+         {% with visitas|first as visita %}
+            <h4>Estado de la ultima visita: {{visita.estado}}</h4>
+         {% endwith %}
+      {% endif %}
+      <h4>Estado del cliente: {{cliente.estado}}</h4>
+      {% if cliente.fecha_vencimiento != None %}
+         <h4>Fecha de vencimiento: {{cliente.fecha_vencimiento}}</h4>
+      {% endif %}
+
+
       <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}" class="btn btn-warning">Editar</a>
 
 
@@ -41,7 +53,7 @@
    <div class="row">
       <div class="col-md-4">
 
-         <h2 class="text-center">Formulario de visitas </h2>
+         <h2 class="text-center">Programar visita</h2>
 
          <form method="post">
             {% csrf_token %}
@@ -68,42 +80,40 @@
                      <tr>
                         <td>{{visita.fecha}}</td>
                         <td>{{visita.observaciones}}</td>
-                        <td><a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-warning">Editar</a>                      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarVisita">
-                              Eliminar
-                           </button>
+                        <td><a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-primary">Editar</a>                                                 {% if visita.estado != "FINALIZADA" %}
+                              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita">
+                                 Finalizar</button>
+                           {% endif %}
                         </td>
                      </tr>
 
 
-                     <!-- Button trigger modal -->
-
-                     <!-- Modal -->
-                     <div class="modal fade" id="modalEliminarVisita" tabindex="-1" aria-labelledby="modalEliminarVisitaLabel" aria-hidden="true">
+                     <div class="modal fade" id="modalFinalizarVisita" tabindex="-1" aria-labelledby="modalFinalizarVisitaLabel" aria-hidden="true">
                         <div class="modal-dialog">
                            <div class="modal-content">
                               <div class="modal-header">
-                                 <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar Visita</h1>
+                                 <h1 class="modal-title fs-5" id="modalFinalizarLabel">Finalizar Visita</h1>
                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
                               <div class="modal-body">
-                                 ¿Estas seguro que deseas eliminar la visita?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
+                                 ¿Estas seguro que deseas finalizar la visita?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
                               </div>
                               <div class="modal-footer">
                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                 <a href="{% url 'clientes:eliminar-visita' visita.pk %}" class="btn btn-danger">Eliminar</a>
+                                 <a href="{% url 'clientes:finalizar-visita' visita.pk %}" class="btn btn-success">Finalizar</a>
 
                               </div>
                            </div>
                         </div>
-                     </div>
-                  {% endfor %}
+
+                     {% endfor %}
 
                </table>
 
             {% endif %}
+                     </div>
+
             </div>
 
-      </div>
-
-   {% endblock content %}
+         {% endblock content %}
 

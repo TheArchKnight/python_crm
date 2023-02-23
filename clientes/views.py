@@ -1,6 +1,7 @@
-from re import I
+from datetime import date, timedelta
+
+
 from django.contrib.auth.views import LoginView, reverse_lazy
-from django.core.mail import send_mail
 from django.http import HttpResponseForbidden, request
 from django.shortcuts import redirect, render
 
@@ -73,6 +74,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(ClienteDetailView, self).get_context_data(**kwargs)
+        visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         #Update the context with our necessary queries
         context.update({
             "visitas": Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha"),
@@ -82,7 +84,14 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
 
     #Manually setting values for the form
     def form_valid(self, form):
-        form.instance.cliente = Cliente.objects.get(id=self.kwargs["pk"])
+        cliente = Cliente.objects.get(id=self.kwargs["pk"])
+        form.instance.cliente = cliente
+        visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        if visitas.count() == 0:
+            cliente.estado = "ACTIVO"
+            cliente.save()
+        form.instance.estado = "EN PROCESO"
+
         return super().form_valid(form)
         
 class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
@@ -101,9 +110,9 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
         #TODO send email
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
-            form.instance.empleado = Empleado.objects.filter(user__username = empleado_username).first()
+            form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         else:
-            form.instance.empleado = Empleado.objects.filter(user = self.request.user).first()
+            form.instance.empleado = Empleado.objects.get(user = self.request.user)
     
         return super(ClienteCreateView, self).form_valid(form)
 
@@ -125,7 +134,7 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         #TODO send email
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
-            form.instance.empleado = Empleado.objects.filter(user__username = empleado_username).first()
+            form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         return super(ClienteUpdateView, self).form_valid(form) 
 
 
@@ -147,7 +156,7 @@ class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
     template_name = "visitas/editar_visita.html"
     queryset = Visita.objects.all()
     form_class = VisitaModelForm
-    
+
     def get_context_data(self, **kwargs):
         context = super(VisitaUpdateView, self).get_context_data(**kwargs)
         #Update the context with our necessary queries
@@ -157,7 +166,7 @@ class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self):
-        return reverse("clientes:detalles-cliente", args=[Cliente.objects.filter(visita = self.kwargs["pk"]).first().id])
+        return reverse("clientes:detalles-cliente", args=[Cliente.objects.get(visita = self.kwargs["pk"]).id])
 
 
 class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
@@ -190,6 +199,18 @@ def search_clientes(request):
     else:
         return render(request, "search_clientes.html", {})
 
+def finalizar_visita(request, pk):
+    visita = Visita.objects.get(id=pk)
+    visita.estado = "FINALIZADA"
+    visita.save()
+    cliente = Cliente.objects.get(visita__id=pk)
+    cliente.fecha_vencimiento = date.today() + timedelta(days= cliente.frecuencia_meses * 30)
+    if cliente.fecha_vencimiento.weekday() > 4:
+        cliente.fecha_vencimiento += timedelta(days=7-cliente.fecha_vencimiento.weekday())
+    print(cliente.fecha_vencimiento)
+    cliente.save()
+    return redirect(f"/clientes/{cliente.id}")
+
 #def eliminar_cliente(request, pk):
 #    cliente = Cliente.objects.get(id=pk)
 #    cliente.delete()
@@ -218,6 +239,7 @@ def search_clientes(request):
     #        "cliente":cliente,
     #        "form":form
     #        })
+
 #
 #def lista_clientes(request):
 #    clientes = Cliente.objects.all()

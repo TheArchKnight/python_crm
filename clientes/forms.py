@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import forms
 from django.forms import PasswordInput, widgets
 from .models import Cliente, Empleado, User, Visita
@@ -14,7 +15,7 @@ class VisitaModelForm(forms.ModelForm):
 
                 )
         widgets={
-                "fecha" : forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+                "fecha" : forms.DateInput(attrs={"class": "form-control", "type": "date", "min": datetime.today().strftime("%Y-%m-%d")}),
                 "observaciones" : forms.Textarea(attrs={"class": "form-control"}),
 #                "cliente": forms.Select(attrs={"class": "form-control"})
                 }
@@ -26,7 +27,6 @@ class VisitaForm(forms.Form):
 
 
 class ClienteModelForm(forms.ModelForm):
-    fields =()
     class Meta:
         model = Cliente
         fields = (
@@ -35,6 +35,7 @@ class ClienteModelForm(forms.ModelForm):
                 'nit',
                 'correo',
                 'frecuencia_meses',
+                "estado"
                 )
         widgets = {
                 'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
@@ -42,16 +43,18 @@ class ClienteModelForm(forms.ModelForm):
                 'nit': forms.NumberInput(attrs={"class":'form-control'}),
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
                 'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
+                "estado": forms.Select(attrs={"class":"form-control"})
 #               'empleado': forms.Select(attrs={"class":'form-control'}),
                 }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", 0)
         super(ClienteModelForm, self).__init__( *args, **kwargs)
+
         #Verify priviliges to assign clients to certain agents
         if user.is_organisor:
             queryset = Empleado.objects.all()
             choices = [[i,i] for i in queryset]
-            choices.insert(0, ["---", "---"])
+            choices.insert(0, [None, "---"])
             self.fields["empleado_field"] = forms.ChoiceField(label="empleado", choices=choices)
               
             
@@ -90,7 +93,7 @@ class CustomUserCreationForm(UserCreationForm):
  
     class Meta:
         model = User
-        fields=("username", "fumigacion", "fachadas", "inventario")
+        fields=("username", "fumigacion", "fachadas", "inventario", "email")
         field_classes = {"username": CustomUserNameField}
         labels = {
                 "fumigacion": "Fumigacion",
@@ -101,6 +104,7 @@ class CustomUserCreationForm(UserCreationForm):
         help_texts = {
                 "username" : "",
                 }
+        widgets = {"email": forms.EmailInput(attrs={"class": "form-control"})}
 
 class LoginForm(AuthenticationForm):
     username = UsernameField(label=("Usuario"), widget=forms.TextInput(attrs={"autofocus": True, "class": "form-control" }))
