@@ -32,8 +32,9 @@ class Cliente(models.Model):
     frecuencia_meses = models.IntegerField(default=1)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
     fecha_vencimiento = models.DateField(null=True, default=None)
+    fecha_llamada = models.DateField(null=True, default=None)
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
-
+    rechazos = models.IntegerField(default=0, null=False)
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
   

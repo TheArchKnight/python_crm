@@ -46,7 +46,7 @@
                            <td>{{cliente.fecha_vencimiento}}</td>
                         {% endif %}
                         <td>{{cliente.estado}}</td>
-                        <td> <a href="{% url 'clientes:detalles-cliente' cliente.pk %}" class="btn btn-success align-self-lg-center" role="button">Detalles</a> </td>
+                        <td> <a href="{% url 'clientes:detalles-cliente' cliente.pk %}" class="btn btn-primary align-self-lg-center" role="button">Detalles</a> </td>
 
                      </tr>
                   {% endfor %}

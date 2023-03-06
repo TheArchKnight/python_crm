@@ -10,6 +10,8 @@ urlpatterns = [
     path("<int:pk>/editar/", VisitaUpdateView.as_view(), name="editar-visita"),
     path("<int:pk>/eliminar_visita/", VisitaDeleteView.as_view(), name="eliminar-visita"),
     path("<int:pk>/finalizar_visita/", finalizar_visita, name="finalizar-visita"),
+    path("<int:pk>/rechazo/", rechazo_cliente, name="rechazo"),
     path("busqueda/", search_clientes, name="search-clientes" ),
+    path("<int:pk>/reprogramar/", reprogramar_visita, name="reprogramar-visita"),
 #    path('<int:pk>/visitas/', include('visitas.urls', namespace='visitas'))
 ]

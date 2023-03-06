@@ -3,7 +3,7 @@
 {% block content %}
    <a href="{% url 'clientes:detalles-cliente' cliente.pk %}">Volver a {{cliente}}</a>
    <hr />
-   <h1>Actualizar cliente: {{cliente}}</h1>
+   <h1>Editar datos del cliente: {{cliente}}</h1>
    <div class="form-group">
       <form method="post">
          {% csrf_token %}

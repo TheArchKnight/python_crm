@@ -2,65 +2,118 @@
 
 
 {% block content %}
+
+   <!-- Modal finalizar visita -->
+   <div class="modal fade" id="modalFinalizarVisita" tabindex="-1" aria-labelledby="modalFinalizarVisitaLabel" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h1 class="modal-title fs-5" id="modalFinalizarLabel">Finalizar Visita</h1>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               ¿Estas seguro que deseas finalizar la visita?. A esta visita no se le podran agregar nuevos elementos, y pasara a ser parte del historial del cliente de manera PERMANENTE.
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+               {% if visitas.count > 0 %}               
+                  {% with visitas|first as visita %}
+                     <a href="{% url 'clientes:finalizar-visita' visita.pk %}" class="btn btn-success">Finalizar</a>
+                  {% endwith %}
+               {% endif %}
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal reprogramar visita-->
+   <div class="modal fade" id="modalReprogramarVisita" tabindex="-1" aria-labelledby="modalReprogramarVisitaLabel" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h1 class="modal-title fs-5" id="modalReprogramarVisitaLabel">Reprogramar Visita</h1>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+               {% if visitas.count > 0 %}
+                  {% with visitas|first as visita %}
+                     <form action="{% url 'clientes:reprogramar-visita' visita.pk%}" method="post" name="reprogramar" id="reprogramar">
+                        {% csrf_token %}
+                        Ingrese la nueva fecha: <input type="date" name="nueva_fecha">
+                     </form>
+                  {% endwith %}
+               {% endif %}
+
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+               <button type="submit" form="reprogramar" class="btn btn-success">Reprogramar</button>
+
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Modal eliminar cliente-->
+   <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
+      <div class="modal-dialog">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar cliente</h1>
+               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               ¿Estas seguro que deseas eliminar el cliente?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
+            </div>
+            <div class="modal-footer">
+               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+               <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}" class="btn btn-danger">Eliminar</a>
+
+            </div>
+         </div>
+      </div>
+   </div>
+
    <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
 
    <div class="text-center">   
       <h1>{{cliente}}</h1>
       <h3>{{cliente.direccion}}</h3>
+      <h4>Estado del cliente: {{cliente.estado}}</h4>
+
       {% if cliente.estado == "ACTIVO" %}      
          {% with visitas|first as visita %}
             <h4>Estado de la ultima visita: {{visita.estado}}</h4>
          {% endwith %}
       {% endif %}
-      <h4>Estado del cliente: {{cliente.estado}}</h4>
       {% if cliente.fecha_vencimiento != None %}
          <h4>Fecha de vencimiento: {{cliente.fecha_vencimiento}}</h4>
       {% endif %}
-
-
-      <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}" class="btn btn-warning">Editar</a>
-
-
+      <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}" class="btn btn-warning"><i class="bi bi-clipboard2-plus"></i> Editar</a>
       <!-- Button trigger modal -->
       <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
-         Eliminar
+         <i class="bi bi-trash"></i> Eliminar
       </button>
-
-      <!-- Modal -->
-      <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
-         <div class="modal-dialog">
-            <div class="modal-content">
-               <div class="modal-header">
-                  <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar cliente</h1>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-               </div>
-               <div class="modal-body">
-                  ¿Estas seguro que deseas eliminar el cliente?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
-               </div>
-               <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}" class="btn btn-danger">Eliminar</a>
-
-               </div>
-            </div>
-         </div>
-      </div>
-
    </div>
-
    <hr>
 
    <div class="row">
       <div class="col-md-4">
 
          <h2 class="text-center">Programar visita</h2>
+         {% with visitas|first as visita  %}
+            {% if visitas.count != 0 and visita.estado != "EN PROCESO"%}
+               Cantidad de rechazos por parte del cliente: {{cliente.rechazos}} 
+               <a href="{% url 'clientes:rechazo' cliente.pk %}" class="btn btn-primary">No responde/No desea</a>
+            {% endif %}
+         {% endwith %}
 
          <form method="post">
             {% csrf_token %}
             {{form.as_p}}
             <button type="submit" class="btn btn-success"> Guardar</button>
          </form>
-
       </div>
 
       <div class="col-md-8">
@@ -80,40 +133,28 @@
                      <tr>
                         <td>{{visita.fecha}}</td>
                         <td>{{visita.observaciones}}</td>
-                        <td><a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-primary">Editar</a>                                                 {% if visita.estado != "FINALIZADA" %}
-                              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita">
-                                 Finalizar</button>
+                        <td>                           
+                           {% if visita.estado != "FINALIZADA" %}
+                              <button type="button" class="btn btn-primary">Añadir archivos</button>
+                              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReprogramarVisita">Reprogramar</button>
+                              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita">Finalizar</button>
+                           {% else %}
+
+                              <a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-primary">Editar</a>                                                 
+
                            {% endif %}
                         </td>
                      </tr>
 
 
-                     <div class="modal fade" id="modalFinalizarVisita" tabindex="-1" aria-labelledby="modalFinalizarVisitaLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                           <div class="modal-content">
-                              <div class="modal-header">
-                                 <h1 class="modal-title fs-5" id="modalFinalizarLabel">Finalizar Visita</h1>
-                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body">
-                                 ¿Estas seguro que deseas finalizar la visita?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
-                              </div>
-                              <div class="modal-footer">
-                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                 <a href="{% url 'clientes:finalizar-visita' visita.pk %}" class="btn btn-success">Finalizar</a>
-
-                              </div>
-                           </div>
-                        </div>
-
-                     {% endfor %}
+                  {% endfor %}
 
                </table>
 
             {% endif %}
-                     </div>
-
             </div>
 
-         {% endblock content %}
+      </div>
+
+   {% endblock content %}
 

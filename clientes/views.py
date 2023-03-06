@@ -1,8 +1,8 @@
 from datetime import date, timedelta
-
+from dateutil import relativedelta as rd
 
 from django.contrib.auth.views import LoginView, reverse_lazy
-from django.http import HttpResponseForbidden, request
+#from django.http import HttpResponseForbidden, request
 from django.shortcuts import redirect, render
 
 
@@ -89,7 +89,8 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
         visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         if visitas.count() == 0:
             cliente.estado = "ACTIVO"
-            cliente.save()
+        cliente.rechazos = 0
+        cliente.save()
         form.instance.estado = "EN PROCESO"
 
         return super().form_valid(form)
@@ -204,12 +205,33 @@ def finalizar_visita(request, pk):
     visita.estado = "FINALIZADA"
     visita.save()
     cliente = Cliente.objects.get(visita__id=pk)
-    cliente.fecha_vencimiento = date.today() + timedelta(days= cliente.frecuencia_meses * 30)
+    cliente.fecha_vencimiento = visita.fecha + rd.relativedelta(months=cliente.frecuencia_meses)
     if cliente.fecha_vencimiento.weekday() > 4:
         cliente.fecha_vencimiento += timedelta(days=7-cliente.fecha_vencimiento.weekday())
-    print(cliente.fecha_vencimiento)
     cliente.save()
     return redirect(f"/clientes/{cliente.id}")
+
+def rechazo_cliente(request, pk):
+    cliente = Cliente.objects.get(id=pk)
+    cliente.rechazos += 1
+    #Una vez el cliente haya rechazado nuestras ofertas 3 veces, pasara a 
+    #ser un cliente INACTIVO
+    if cliente.rechazos == 3:
+        cliente.estado = "INACTIVO"
+    else:
+        cliente.fecha_llamada = date.today() + rd.relativedelta(days=15)
+    cliente.save()
+    return redirect(f"/clientes/{cliente.id}")
+
+
+def reprogramar_visita(request, pk):
+    visita = Visita.objects.get(id=pk)
+    if request.method == "POST":
+        nueva_fecha = request.POST["nueva_fecha"]
+        visita.fecha = nueva_fecha
+        visita.save()
+    return redirect(f"/clientes/{visita.cliente.id}")
+
 
 #def eliminar_cliente(request, pk):
 #    cliente = Cliente.objects.get(id=pk)
