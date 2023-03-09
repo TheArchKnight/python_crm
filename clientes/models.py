@@ -25,6 +25,7 @@ class UserProfile(models.Model):
 class Cliente(models.Model):
 
     CHOICES_ESTADO = (("INACTIVO", "Inactivo"), ("POTENCIAL", "Potencial"))
+    CHOICES_SERVICIO = (("VENCIDO", "Vencido"), ("GARANTIA", "Garantia"), ("EN TERMINOS", "En terminos"))
     nombre_orgnanizacion = models.CharField(max_length=20)
     direccion = models.CharField(max_length=30)
     nit = models.IntegerField()
@@ -32,9 +33,9 @@ class Cliente(models.Model):
     frecuencia_meses = models.IntegerField(default=1)
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
     fecha_vencimiento = models.DateField(null=True, default=None)
-    fecha_llamada = models.DateField(null=True, default=None)
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
     rechazos = models.IntegerField(default=0, null=False)
+    estado_servicio = models.CharField(max_length=15, choices=CHOICES_SERVICIO)
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
   
@@ -45,19 +46,41 @@ class Empleado(models.Model):
     def __str__(self):
         return self.user.username
 
-class Visita(models.Model):
-    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
+#class Visita(models.Model):
+#    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
+#
+#    fecha = models.DateField()
+#    observaciones = models.TextField()
+#    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+#    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO)
+#    def __str__(self):
+#        return f"{self.fecha}"
 
+#class Llamada(models.Model):
+#
+#    CHOICES_ESTADO = (("REALIZADA", "Realizada"), ("PENDIENTE", "Pendiente"))
+#    fecha = models.DateField()
+#    cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+#    observaciones = models.TextField()
+#    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="PENDIENTE")
+
+class Interaccion(models.Model):
     fecha = models.DateField()
     observaciones = models.TextField()
     cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
-    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO)
     def __str__(self):
         return f"{self.fecha}"
 
+class Visita(Interaccion):
+    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
+    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO)
+
+class Llamada(Interaccion):
+    CHOICES_ESTADO = (("REALIZADA", "Realizada"), ("PENDIENTE", "Pendiente"))
+    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="PENDIENTE")
 
 #signal to execute when an user is created
-def post_user_created_signal(sender, instance, created, **kwars):
+def post_user_created_signal(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
         if instance.fumigacion or instance.fachadas or instance.inventario:

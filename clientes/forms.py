@@ -1,29 +1,38 @@
 from datetime import datetime
 from django import forms
-from django.forms import PasswordInput, widgets
-from .models import Cliente, Empleado, User, Visita
+from django.db.models.expressions import NoneType
+from django.forms import DateField, DateInput, PasswordInput, widgets
+from .models import Cliente, Empleado, Interaccion, User, Visita
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, password_validation
+from datetime import timedelta
 
-
-class VisitaModelForm(forms.ModelForm):
+class InteraccionModelForm(forms.ModelForm):
     class Meta:
-        model = Visita
+        model = Interaccion
         fields=(
                 'fecha',
                 'observaciones',
-#                "cliente",
-
                 )
         widgets={
-                "fecha" : forms.DateInput(attrs={"class": "form-control", "type": "date", "min": datetime.today().strftime("%Y-%m-%d")}),
-                "observaciones" : forms.Textarea(attrs={"class": "form-control"}),
-#                "cliente": forms.Select(attrs={"class": "form-control"})
-                }
+                "observaciones" : forms.Textarea(attrs={"class": "form-control", "style": "resize: none;"}),
+               }
+    def __init__(self, *args, **kwargs):
+        #We can only schedule new visits after the most recent one.
+        TIPO = (("VISITA", "Visita"), ("LLAMADA", "Llamada"))
+        ultima_visita = kwargs.pop("ultima_visita", 0)
+        super(InteraccionModelForm, self).__init__( *args, **kwargs)
+        dict = {"class": "form-control", "type": "date"} 
+        if ultima_visita == None:
+            dict["min"] = datetime.today().strftime("%Y-%m-%d")
+        else:
+            dict["min"] = (ultima_visita.fecha + timedelta(days=1)).strftime("%Y-%m-%d")
+        self.fields["fecha"] = forms.DateField(widget = forms.DateInput(attrs= dict))
+        self.fields["tipo"] = forms.ChoiceField(widget = forms.Select(attrs={"class": "form-control"}), choices=TIPO)
 
+       
 class VisitaForm(forms.Form):
     fecha = forms.DateField(widget=forms.DateInput(attrs={"class":"form-control"}))
     observaciones = forms.CharField(widget=forms.Textarea(attrs={"class": "form-control", "style":"resize:none"}))
-
 
 
 class ClienteModelForm(forms.ModelForm):
@@ -44,12 +53,11 @@ class ClienteModelForm(forms.ModelForm):
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
                 'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
                 "estado": forms.Select(attrs={"class":"form-control"})
-#               'empleado': forms.Select(attrs={"class":'form-control'}),
                 }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", 0)
         super(ClienteModelForm, self).__init__( *args, **kwargs)
-
+        
         #Verify priviliges to assign clients to certain agents
         if user.is_organisor:
             queryset = Empleado.objects.all()
@@ -58,8 +66,6 @@ class ClienteModelForm(forms.ModelForm):
             self.fields["empleado_field"] = forms.ChoiceField(label="empleado", choices=choices)
               
             
-
-
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
     nombre_orgnanizacion = forms.CharField()

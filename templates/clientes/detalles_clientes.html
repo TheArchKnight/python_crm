@@ -101,13 +101,23 @@
    <div class="row">
       <div class="col-md-4">
 
-         <h2 class="text-center">Programar visita</h2>
+         <h2 class="text-center">Programar visita/llamada</h2>
+         
          {% with visitas|first as visita  %}
             {% if visitas.count != 0 and visita.estado != "EN PROCESO"%}
                Cantidad de rechazos por parte del cliente: {{cliente.rechazos}} 
                <a href="{% url 'clientes:rechazo' cliente.pk %}" class="btn btn-primary">No responde/No desea</a>
             {% endif %}
          {% endwith %}
+         <form method="post" action="">
+            <select name="tipo" id="tipo" onchange="this.form.submit">
+               <option value="1">Visita</option>
+               <option value="2">Llamada</option>
+
+            </select>
+
+         </form>
+
 
          <form method="post">
             {% csrf_token %}
@@ -121,7 +131,7 @@
 
          {% if visitas.count != 0 %}
 
-            <div class="table-responsive">
+            <div class="table-responsive" style="overflow:scroll; height: 500px;">
 
                <table class="table table-striped ">
                   <tr>

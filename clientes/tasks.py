@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from crm_django.celery import app
 from django.core.mail import send_mail
 from clientes.models import Empleado, Cliente, Visita
@@ -11,6 +11,8 @@ def send_notifications():
         if len(clientes_vencimiento) > 0 or len(clientes_llamada) > 0:
             body_email = "¡Hola {empleado.user.username}!\n"
             for cliente in clientes_vencimiento:
+                cliente.estado_servicio = "VENCIDO"
+                cliente.save()
                 body_email += f"El dia de hoy, {len(clientes_vencimiento)} clientes han superado los terminos de tiempo con nuestros servicios. A continuacion encontraras algunos detalles de estos clientes, puedes visualizarlos mas a detalles en el CRM.\n\n"
     
                 visita = Visita.objects.filter(cliente = cliente).first()
@@ -20,6 +22,18 @@ def send_notifications():
                 visita = Visita.objects.filter(cliente = cliente).first()
                 body_email += f"Nombre: {cliente.nombre_orgnanizacion}\nDireccion: {cliente.direccion}\nFrecuencia de visitas (meses): {cliente.frecuencia_meses}\nUltima visita: {visita.fecha}\nFecha de vencimiento: {cliente.fecha_vencimiento}\n"
             send_mail("Clientes con vencimiento de terminos", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
+
+@app.task
+def garantias():
+    fecha_garantia = datetime.today - timedelta(days=15)
+    visitas_garantia = Visita.objects.filter(fecha=fecha_garantia, estado="FINALIZADA")
+    for visita in visitas_garantia:
+        cliente = Cliente.objects.get(id=visita.cliente.id)
+        empleado = Empleado.objects.get(id=cliente.empleado.id)
+
+
+
+
 
 
 

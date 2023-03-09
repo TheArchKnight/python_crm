@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from clientes.mixins import EmpleadoRequiredMixin
-from .forms import VisitaModelForm
+from .forms import InteraccionModelForm
 
 #from clientes.forms import ClienteForm
 from .models import Cliente, Empleado
@@ -67,14 +67,14 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
 #and the details of data to work.
 class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
     template_name = "clientes/detalles_clientes.html"
-    form_class= VisitaModelForm
+    form_class= InteraccionModelForm
     def get_success_url(self):
         #Args receives a list with arguments
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
 
     def get_context_data(self, **kwargs):
         context = super(ClienteDetailView, self).get_context_data(**kwargs)
-        visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        #visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         #Update the context with our necessary queries
         context.update({
             "visitas": Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha"),
@@ -82,11 +82,19 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
             }) 
         return context
 
+
+    def get_form_kwargs(self):
+        #pass kwarg with last visit
+        kwargs = super().get_form_kwargs()
+        kwargs["ultima_visita"] = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha").first()
+        return kwargs
+
     #Manually setting values for the form
     def form_valid(self, form):
         cliente = Cliente.objects.get(id=self.kwargs["pk"])
         form.instance.cliente = cliente
         visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        #set default values for client once a service is scheduled
         if visitas.count() == 0:
             cliente.estado = "ACTIVO"
         cliente.rechazos = 0
@@ -103,12 +111,13 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
         return reverse("clientes:lista-cliente")
     
     def get_form_kwargs(self):
+        #pass user instance as an argument for the form
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
 
     def form_valid(self, form):
-        #TODO send email
+        #Allow organisor users to assing clients to agents.
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
@@ -127,6 +136,7 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
 
     def get_form_kwargs(self):
+        #ppas user instance as a kwarg, for form edition.
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
@@ -156,7 +166,7 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
 class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
     template_name = "visitas/editar_visita.html"
     queryset = Visita.objects.all()
-    form_class = VisitaModelForm
+    form_class = InteraccionModelForm
 
     def get_context_data(self, **kwargs):
         context = super(VisitaUpdateView, self).get_context_data(**kwargs)
