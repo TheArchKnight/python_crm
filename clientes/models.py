@@ -73,7 +73,7 @@ class Interaccion(models.Model):
 
 class Visita(Interaccion):
     CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
-    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO)
+    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="EN PROCESO")
 
 class Llamada(Interaccion):
     CHOICES_ESTADO = (("REALIZADA", "Realizada"), ("PENDIENTE", "Pendiente"))

@@ -3,16 +3,16 @@ from dateutil import relativedelta as rd
 
 from django.contrib.auth.views import LoginView, reverse_lazy
 #from django.http import HttpResponseForbidden, request
-from django.shortcuts import redirect, render
+from django.shortcuts import HttpResponse, redirect, render
 
 
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
 from clientes.mixins import EmpleadoRequiredMixin
-from .forms import InteraccionModelForm
+from .forms import InteraccionForm
 
 #from clientes.forms import ClienteForm
-from .models import Cliente, Empleado
+from .models import Cliente, Empleado, Llamada
 from .models import Visita
 from .forms import ClienteModelForm, CustomUserCreationForm, LoginForm
 
@@ -65,9 +65,9 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
 #allows the user to create new visits. For this, a creatview class
 #is used, and the context is updated with the necessary data for the forms
 #and the details of data to work.
-class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
+class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     template_name = "clientes/detalles_clientes.html"
-    form_class= InteraccionModelForm
+    form_class= InteraccionForm
     def get_success_url(self):
         #Args receives a list with arguments
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
@@ -82,7 +82,6 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
             }) 
         return context
 
-
     def get_form_kwargs(self):
         #pass kwarg with last visit
         kwargs = super().get_form_kwargs()
@@ -92,14 +91,20 @@ class ClienteDetailView(EmpleadoRequiredMixin, CreateView):
     #Manually setting values for the form
     def form_valid(self, form):
         cliente = Cliente.objects.get(id=self.kwargs["pk"])
-        form.instance.cliente = cliente
         visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
-        #set default values for client once a service is scheduled
-        if visitas.count() == 0:
-            cliente.estado = "ACTIVO"
-        cliente.rechazos = 0
-        cliente.save()
-        form.instance.estado = "EN PROCESO"
+        fecha = form.cleaned_data["fecha"]
+        observaciones = form.cleaned_data["observaciones"]
+    #our form is a generic one which can be used for creating multiple subclasses of the interaction parent class
+        if form.cleaned_data["tipo"] == "VISITA":
+            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
+            if visitas.count() == 0:
+                cliente.estado = "ACTIVO"
+            cliente.rechazos = 0
+            cliente.save()
+
+        elif form.cleaned_data["tipo"] == "LLAMADA":
+            Llamada.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
+   
 
         return super().form_valid(form)
         
@@ -166,7 +171,7 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
 class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
     template_name = "visitas/editar_visita.html"
     queryset = Visita.objects.all()
-    form_class = InteraccionModelForm
+    form_class = InteraccionForm
 
     def get_context_data(self, **kwargs):
         context = super(VisitaUpdateView, self).get_context_data(**kwargs)
@@ -214,7 +219,7 @@ def finalizar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
     visita.estado = "FINALIZADA"
     visita.save()
-    cliente = Cliente.objects.get(visita__id=pk)
+    cliente = Cliente.objects.get(id=visita.cliente.pk)
     cliente.fecha_vencimiento = visita.fecha + rd.relativedelta(months=cliente.frecuencia_meses)
     if cliente.fecha_vencimiento.weekday() > 4:
         cliente.fecha_vencimiento += timedelta(days=7-cliente.fecha_vencimiento.weekday())
