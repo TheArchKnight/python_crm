@@ -1,15 +1,26 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+{% load static %}
+{% url 'landing-page' as landing_url %}
+{% url 'clientes:lista-cliente' as lista_url %}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-bs-theme="dark">
    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'landing-page' %}">CRM</a>
+      {% comment "show the back button only no necessary pages." %}{% endcomment %}
+      {% if request.path != landing_url and request.path != lista_url%}
+         <button onclick="location.href='{{previous}}'" class="btn btn-secondary" title="Volver a la pagina previa"><i class="bi bi-arrow-left-square"></i></button>
+      {% endif %}
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
          <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
 
          <div class="navbar-nav">
+            <img src="{% static 'img/logo-doctor-clean.png' %}" class="logo">
+            <!--
             {% if request.user.is_authenticated %}
                <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a> 
             {% endif %}
+            -->
             {% if request.user.is_organisor %}
                <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
             {% endif %}
@@ -18,22 +29,19 @@
          <div class="navbar-nav ms-auto">
             {% if request.user.is_authenticated %}
                <span class="navbar-text">Perfil: {{request.user.username}}</span> 
-               <a class ="mx-3  nav-link" href="{% url 'logout' %}">Logout</a>
-               <form class="d-flex" method="post" action="{% url 'clientes:search-clientes' %}">
-                  {% csrf_token %}
-                  <input class="form-control me-2"type="search" aria-level="Search" name="searched">
-                  <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-               </form>
-
+               <a class ="mx-3  nav-link" href="{% url 'logout' %}">Cerrar sesion</a>
+               {% comment "Navbar button for searching clientes in DB" %}{% endcomment %}
+               {% if request.path == lista_url %}
+                  <form class="d-flex" role="search" method="post" action="{% url 'clientes:search-clientes' %}">
+                     {% csrf_token %}
+                     <input class="form-control me-2"type="search" aria-label="Search" name="searched">
+                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                  </form>
+               {% endif %}
             {% else %}
                <a class="nav-link" href="{% url 'signup' %}">Registrarse</a>
-
-
             {% endif %}
-
          </div>
-
-
       </div>
    </div>
 </nav>

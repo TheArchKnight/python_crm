@@ -1,0 +1,31 @@
+<!-- Modal subir archivos-->
+<div class="modal fade" id="modalSubirArchivos" tabindex="-1" aria-labelledby="modalSubirArchivosLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalSubirArchivosLabel">Subir Archivos</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body text-center">
+            {% with pk1=cliente pk2=interaccion%}
+               <form action="{% url 'clientes:subir-archivo' pk1 pk2 %}" method="post" enctype="multipart/form-data" name="subir" id="subir">
+                  {% csrf_token %}
+                  Seleccione los archivos que desea subir: <input type="file" name="files" multiple="multiple">
+               </form>
+
+
+            {% endwith %}
+
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+            <button type="submit" form="subir" class="btn btn-success">Reprogramar</button>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+
+

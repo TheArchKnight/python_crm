@@ -3,160 +3,128 @@
 
 {% block content %}
 
-   <!-- Modal finalizar visita -->
-   <div class="modal fade" id="modalFinalizarVisita" tabindex="-1" aria-labelledby="modalFinalizarVisitaLabel" aria-hidden="true">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h1 class="modal-title fs-5" id="modalFinalizarLabel">Finalizar Visita</h1>
-               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-               ¿Estas seguro que deseas finalizar la visita?. A esta visita no se le podran agregar nuevos elementos, y pasara a ser parte del historial del cliente de manera PERMANENTE.
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-               {% if visitas.count > 0 %}               
-                  {% with visitas|first as visita %}
-                     <a href="{% url 'clientes:finalizar-visita' visita.pk %}" class="btn btn-success">Finalizar</a>
-                  {% endwith %}
-               {% endif %}
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <!-- Modal reprogramar visita-->
-   <div class="modal fade" id="modalReprogramarVisita" tabindex="-1" aria-labelledby="modalReprogramarVisitaLabel" aria-hidden="true">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h1 class="modal-title fs-5" id="modalReprogramarVisitaLabel">Reprogramar Visita</h1>
-               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-               {% if visitas.count > 0 %}
-                  {% with visitas|first as visita %}
-                     <form action="{% url 'clientes:reprogramar-visita' visita.pk%}" method="post" name="reprogramar" id="reprogramar">
-                        {% csrf_token %}
-                        Ingrese la nueva fecha: <input type="date" name="nueva_fecha">
-                     </form>
-                  {% endwith %}
-               {% endif %}
-
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
-               <button type="submit" form="reprogramar" class="btn btn-success">Reprogramar</button>
-
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <!-- Modal eliminar cliente-->
-   <div class="modal fade" id="modalEliminar" tabindex="-1" aria-labelledby="modalEliminarLabel" aria-hidden="true">
-      <div class="modal-dialog">
-         <div class="modal-content">
-            <div class="modal-header">
-               <h1 class="modal-title fs-5" id="modalEliminarLabel">Eliminar cliente</h1>
-               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-               ¿Estas seguro que deseas eliminar el cliente?. Su informacion no podra ser recuperada, y se eliminara de manera PERMANENTE de la base de datos.
-            </div>
-            <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-               <a href="{% url 'clientes:eliminar-cliente' cliente.pk %}" class="btn btn-danger">Eliminar</a>
-
-            </div>
-         </div>
-      </div>
-   </div>
-
-   <a href="{% url 'clientes:lista-cliente' %}">Volver a clientes</a>
-
-   <div class="text-center">   
-      <h1>{{cliente}}</h1>
-      <h3>{{cliente.direccion}}</h3>
-      <h4>Estado del cliente: {{cliente.estado}}</h4>
-
-      {% if cliente.estado == "ACTIVO" %}      
-         {% with visitas|first as visita %}
-            <h4>Estado de la ultima visita: {{visita.estado}}</h4>
-         {% endwith %}
-      {% endif %}
-      {% if cliente.fecha_vencimiento != None %}
-         <h4>Fecha de vencimiento: {{cliente.fecha_vencimiento}}</h4>
-      {% endif %}
-      <a href="{% url 'clientes:actualizar-cliente' cliente.pk %}" class="btn btn-warning"><i class="bi bi-clipboard2-plus"></i> Editar</a>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar">
-         <i class="bi bi-trash"></i> Eliminar
-      </button>
-   </div>
-   <hr>
-
    <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-3 info-parent"> 
+         <div class="row text-center info-cliente" >
 
-         <h2 class="text-center">Programar visita/llamada</h2>
-         
-         {% with visitas|first as visita  %}
-            {% if visitas.count != 0 and visita.estado != "EN PROCESO"%}
-               Cantidad de rechazos por parte del cliente: {{cliente.rechazos}} 
-               <a href="{% url 'clientes:rechazo' cliente.pk %}" class="btn btn-primary">No responde/No desea</a>
+            <h1>{{cliente}}</h1>
+            <h3>{{cliente.direccion}}</h3>
+            <h4>Estado del cliente: {{cliente.estado}}</h4>
+
+            {% if cliente.estado == "ACTIVO" %}      
+               {% with visitas_cliente|first as visita %}
+                  <h4>Estado de la ultima visita: {{visita.estado}}</h4>
+               {% endwith %}
             {% endif %}
-         {% endwith %}
-
-
-         <form method="post">
-            {% csrf_token %}
-            {{form.as_p}}
-            <button type="submit" class="btn btn-success"> Guardar</button>
-         </form>
-      </div>
-
-      <div class="col-md-8">
-         <h2 class="text-center">Visitas:</h2>
-
-         {% if visitas.count != 0 %}
-
-            <div class="table-responsive" style="overflow:scroll; height: 500px;">
-
-               <table class="table table-striped ">
-                  <tr>
-                     <td>Fecha</td>
-                     <td>Observaciones</td>
-                     <td></td>
-                  </tr>
-                  {% for visita in visitas %}
-                     <tr>
-                        <td>{{visita.fecha}}</td>
-                        <td>{{visita.observaciones}}</td>
-                        <td>                           
-                           {% if visita.estado != "FINALIZADA" %}
-                              <button type="button" class="btn btn-primary">Añadir archivos</button>
-                              <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReprogramarVisita">Reprogramar</button>
-                              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita">Finalizar</button>
-                           {% else %}
-
-                              <a href="{% url 'clientes:editar-visita' visita.pk%}" class="btn btn-primary">Editar</a>                                                 
-
-                           {% endif %}
-                        </td>
-                     </tr>
-
-
-                  {% endfor %}
-
-               </table>
-
+            {% if cliente.fecha_vencimiento != None %}
+               <h4>Vencimiento: {{cliente.fecha_vencimiento}}</h4>
             {% endif %}
+            <div class="text-center">
+
+               <a href="{% url 'clientes:actualizar-cliente' cliente.pk%}" class="btn btn-warning" title="Editar">
+                  <i class="bi bi-clipboard2-plus"></i>
+               </a>                                                
+
+               {% include "modals/eliminar_cliente.html" with pk=cliente.pk %}
+               <!-- Button trigger modal -->
+               <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+               </button>
+
             </div>
 
+         </div>
+
+         <div class="row my-3">
+
+            <h2 class="text-center">Programar visita/llamada</h2>
+
+            <div class="text-center">
+               {% with llamadas|first as llamada  %}
+                  {% if llamadas.count != 0 and llamada.estado != "FINALIZADA"%}
+                     Cantidad de rechazos por parte del cliente: {{cliente.rechazos}} 
+
+                  {% endif %}
+               {% endwith %}
+
+            </div>
+
+            <form method="post">
+               {% csrf_token %}
+               {{form.as_p}}
+               <div class="text-center">
+                  <button type="submit" class="btn btn-success"> Guardar</button>
+               </div>
+
+            </form>
+         </div>
+
+      </div>
+      <div class="col-md-9">
+         <div class="row">
+            {% if interacciones_cliente.count != 0 %}
+
+               <table class="table table-hover sticky" id="clientes-table">
+                  <h2 class="text-center">Interacciones</h2>
+                  <thead>
+                     <tr >
+                        <th col-index=1>Fecha</th>
+                        <th col-index=2>Observaciones</th>
+                        <th col-index=3>Tipo
+                           <select  class="table-filter form-select text-center"   onchange="filter_rows()">
+                              <option value="all">Todos</option>
+                           </select>
+                        </th>
+                        <th>Acciones</th>
+                     </tr>
+                  </thead>
+
+                  <tbody>                     
+                     {% for interaccion, tipo, visibilidad in interacciones_cliente%}
+                        <tr >
+                           <td>{{interaccion.fecha}}</td>
+                           <td>{{interaccion.observaciones}}</td>
+                           <td>{{tipo}}</td>
+                           <td>                           
+                              {% if interaccion.estado != "FINALIZADA"%}
+                                 {% if tipo == "Visita" %}
+                                    {% include 'modals/finalizar_visita.html' with pk=interaccion.pk %}
+                                    {% include 'modals/subir_archivos.html' with cliente=cliente.pk interaccion=interaccion.pk %}
+                                    {% include 'modals/reprogramar_visita.html' with visita=interaccion.pk %}
+
+
+                                    <button title="Añadir archivos" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" data-bs-target="#modalSubirArchivos"{{visibilidad}}><i class="bi bi-file-earmark-plus"></i>
+                                    </button>
+
+                                    <button title="Reprogramar" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReprogramarVisita"><i class="bi bi-calendar4-range"></i></button>
+                                    <button title="Finalizar visita" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita"{{visibilidad}}><i class="bi bi-check-circle"></i></button>
+                                 {% else %}
+                                    <button title="No responde/No desea" onclick="location.href='{% url 'clientes:rechazo' cliente.pk interaccion.pk%}'" type="button" class="btn btn-danger" {{visibilidad}} >
+                                       <i class="bi bi-telephone-x"></i>
+                                    </button>
+
+                                    <button onclick="location.href='{% url 'clientes:finalizar-llamada' interaccion.pk %}'" type="button" class="btn btn-success" title="Acepto servicio" {{visibilidad}}>
+                                       <i class="bi bi-telephone-inbound"></i>
+                                    </button>
+
+                                 {% endif %}
+                                 <button class="btn btn btn-info" title="Añadir nota" {{visibilidad}}><i class="bi bi-journal-plus"></i></button>
+
+                              {% else %}
+
+                              <!-- <a href="{% url 'clientes:editar-visita' interaccion.pk%}" class="btn btn-primary">Editar</a>-->                                                               {% endif %}
+                              <button onclick="location.href='{% url 'clientes:editar-visita' interaccion.pk %}'" title="Inspeccionar" class="btn btn-primary" {{visibilidad}}><i class="bi bi-search"></i></button>
+
+                           </td>
+                        </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            {% endif %}
+         </div>
       </div>
 
-   {% endblock content %}
+   </div>
+
+{% endblock content %}
 

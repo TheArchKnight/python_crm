@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from shutil import rmtree
 from dateutil import relativedelta as rd
 
 from django.contrib.auth.views import LoginView, reverse_lazy
@@ -8,15 +9,16 @@ from django.shortcuts import HttpResponse, redirect, render
 
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
+from clientes.functions import unica_fecha
 from clientes.mixins import EmpleadoRequiredMixin
-from .forms import InteraccionForm
 
 #from clientes.forms import ClienteForm
 from .models import Cliente, Empleado, Llamada
 from .models import Visita
-from .forms import ClienteModelForm, CustomUserCreationForm, LoginForm
+from .forms import * 
 
-
+import os
+import json
 class SingupView(CreateView):
     template_name="registration/register.html"
     form_class = CustomUserCreationForm
@@ -68,17 +70,47 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
 class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     template_name = "clientes/detalles_clientes.html"
     form_class= InteraccionForm
+
+    def definir_tipos(self,interaccion):
+        if isinstance(interaccion, Visita):
+            return "Visita"
+        elif isinstance(interaccion, Llamada):
+            return "Llamada"
+    
+    def definir_visibilidad(self, interaccion):
+        if interaccion.fecha < datetime.today():
+            return "disabled"
+
     def get_success_url(self):
         #Args receives a list with arguments
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
 
     def get_context_data(self, **kwargs):
         context = super(ClienteDetailView, self).get_context_data(**kwargs)
-        #visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        visitas_cliente = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        llamadas = Llamada.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
+        interacciones_cliente= sorted(list(visitas_cliente) + list(llamadas), key=lambda x: x.fecha, reverse=True)
+        tipos = [self.definir_tipos(i) for i in interacciones_cliente]
+        visibilidades = ["disabled" if i.fecha > date.today() else "" for i in interacciones_cliente]
+        interacciones_cliente = zip(interacciones_cliente, tipos, visibilidades)
+        
+        visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_orgnanizacion")
+#        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_vigentes]
+
+
+        for i in visitas_vigentes:
+            i["fecha"] = i["fecha"].strftime("%Y-%m-%d")
+
+
         #Update the context with our necessary queries
         context.update({
-            "visitas": Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha"),
-            "cliente":Cliente.objects.get(id=self.kwargs["pk"])
+            "visitas_cliente": visitas_cliente,
+            "llamadas": llamadas,
+            "interacciones_cliente": interacciones_cliente,
+            "cliente":Cliente.objects.get(id=self.kwargs["pk"]),
+            "previous":reverse("clientes:lista-cliente"), #Link to back button on navbar
+            #"fechas_usadas":fechas_usadas,
+            "visitas_vigentes":json.dumps(list(visitas_vigentes))
             }) 
         return context
 
@@ -96,10 +128,14 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         observaciones = form.cleaned_data["observaciones"]
     #our form is a generic one which can be used for creating multiple subclasses of the interaction parent class
         if form.cleaned_data["tipo"] == "VISITA":
-            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
+            carpeta = fecha.strftime('%Y-%m-%d')
+            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente, carpeta=carpeta)
             if visitas.count() == 0:
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
+            os.mkdir(os.path.join(cliente.carpeta, carpeta))
+            if cliente.estado == "INACTIVO":
+                cliente.estado = "ACTIVO"
             cliente.save()
 
         elif form.cleaned_data["tipo"] == "LLAMADA":
@@ -128,6 +164,9 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         else:
             form.instance.empleado = Empleado.objects.get(user = self.request.user)
+        form.instance.carpeta = ("/home/anorak/Test/" + form.instance.nombre_orgnanizacion)
+        os.mkdir(form.instance.carpeta)
+        
     
         return super(ClienteCreateView, self).form_valid(form)
 
@@ -146,11 +185,25 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         kwargs["user"] = self.request.user
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super(ClienteUpdateView, self).get_context_data(**kwargs)
+        #Update the context with our necessary queries
+        context.update({
+            "previous":reverse("clientes:detalles-cliente", args=[self.kwargs["pk"]]) #Link to back button on navbar
+            })
+        return context
+
+
     def form_valid(self, form):
         #TODO send email
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
+        src = os.path.join(form.instance.carpeta, "")
+        form.instance.carpeta = "/home/anorak/Test/" + form.instance.nombre_orgnanizacion
+        dst = os.path.join(form.instance.carpeta, "")
+        os.rename(src, dst)
+
         return super(ClienteUpdateView, self).form_valid(form) 
 
 
@@ -160,6 +213,9 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
     http_method_names = ['delete']
 
     def dispatch(self, request, *args, **kwargs):
+        instance = Cliente.objects.get(id=self.kwargs["pk"])
+        rmtree(instance.carpeta)
+
         handler = getattr(self, 'delete')
         return handler(request, *args, **kwargs)
 
@@ -221,32 +277,63 @@ def finalizar_visita(request, pk):
     visita.save()
     cliente = Cliente.objects.get(id=visita.cliente.pk)
     cliente.fecha_vencimiento = visita.fecha + rd.relativedelta(months=cliente.frecuencia_meses)
+    fecha_garantia = visita.fecha + rd.relativedelta(days=15)
+    if fecha_garantia.weekday() > 4:
+        fecha_garantia += timedelta(days=7-fecha_garantia.weekday())
     if cliente.fecha_vencimiento.weekday() > 4:
         cliente.fecha_vencimiento += timedelta(days=7-cliente.fecha_vencimiento.weekday())
+    
+    Llamada.objects.create(fecha=cliente.fecha_vencimiento, observaciones = "VENCIMIENTO TERMINOS", cliente = cliente)
+
+    Llamada.objects.create(fecha=fecha_garantia, observaciones = "SEGUIMIENTO GARANTIA", cliente = cliente)
     cliente.save()
     return redirect(f"/clientes/{cliente.id}")
 
-def rechazo_cliente(request, pk):
-    cliente = Cliente.objects.get(id=pk)
+def finalizar_llamada(request, pk):
+    llamada = Llamada.objects.get(id=pk)
+    llamada.estado = "FINALIZADA"
+    llamada.save()
+    return redirect(f"/clientes/{llamada.cliente.id}")
+
+def rechazo_cliente(request, cliente_pk, interaccion_pk):
+    cliente = Cliente.objects.get(id=cliente_pk)
     cliente.rechazos += 1
+    llamada = Llamada.objects.get(id=interaccion_pk)
     #Una vez el cliente haya rechazado nuestras ofertas 3 veces, pasara a 
     #ser un cliente INACTIVO
-    if cliente.rechazos == 3:
-        cliente.estado = "INACTIVO"
+    if cliente.rechazos < 3:
+        fecha = date.today() + rd.relativedelta(days=15)
+        Llamada.objects.create(fecha = fecha, cliente=cliente)
     else:
-        cliente.fecha_llamada = date.today() + rd.relativedelta(days=15)
+        cliente.estado = "INACTIVO"
+
+    llamada.estado = "FINALIZADA"
+    llamada.save()
     cliente.save()
     return redirect(f"/clientes/{cliente.id}")
-
 
 def reprogramar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
     if request.method == "POST":
         nueva_fecha = request.POST["nueva_fecha"]
         visita.fecha = nueva_fecha
+        src = os.path.join(visita.cliente.carpeta, visita.carpeta)
+        dst = os.path.join(visita.cliente.carpeta, nueva_fecha)
+        os.rename(src, dst)
+        visita.carpeta = nueva_fecha
         visita.save()
-    return redirect(f"/clientes/{visita.cliente.id}")
+        
+    return redirect(reverse("clientes:detalles-cliente", args=[visita.cliente.id]))
 
+def subir_archivo(request, cliente_pk, interaccion_pk):
+    visita = Visita.objects.get(id=interaccion_pk)
+    cliente = Cliente.objects.get(id=cliente_pk)
+    files = request.FILES.getlist("files")
+    for f in files:
+        with open(f"{cliente.carpeta}/{visita.carpeta}/{f.name}", "wb+") as destination:
+            for chunk in f.chunks():
+                destination.write(chunk)
+    return redirect(f"/clientes/{cliente.id}")
 
 #def eliminar_cliente(request, pk):
 #    cliente = Cliente.objects.get(id=pk)

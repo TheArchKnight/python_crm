@@ -1,0 +1,22 @@
+<!-- Modal finalizar visita -->
+<div class="modal fade" id="modalFinalizarVisita" tabindex="-1" aria-labelledby="modalFinalizarVisitaLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalFinalizarLabel">Finalizar Visita</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            ¿Estas seguro que deseas finalizar la visita?. A esta visita no se le podran agregar nuevos elementos, y pasara a ser parte del historial del cliente de manera PERMANENTE.
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            {% with pk as visita_pk%}
+               <a href="{% url 'clientes:finalizar-visita' visita_pk %}" class="btn btn-success">Finalizar</a>
+            {% endwith %}
+         </div>
+      </div>
+   </div>
+</div>
+
+

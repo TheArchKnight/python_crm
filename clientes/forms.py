@@ -6,10 +6,11 @@ from .models import Cliente, Empleado, Interaccion, User, Visita
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, password_validation
 from datetime import timedelta
 
+
 class InteraccionForm(forms.Form):
     TIPO = (("VISITA", "Visita"), ("LLAMADA", "Llamada"))
     tipo = forms.ChoiceField(widget = forms.Select(attrs={"class": "form-control"}), choices=TIPO)
-    observaciones = forms.CharField(widget=forms.Textarea(attrs={"class": "form-control", "style": "resize: none;"}))
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={"class": "form-control", "style": "resize: none; height:150px"}))
     def __init__(self, *args, **kwargs):
         #We can only schedule new visits after the most recent one.
         ultima_visita = kwargs.pop("ultima_visita", 0)

@@ -36,6 +36,7 @@ class Cliente(models.Model):
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
     rechazos = models.IntegerField(default=0, null=False)
     estado_servicio = models.CharField(max_length=15, choices=CHOICES_SERVICIO)
+    carpeta = models.CharField(max_length=30, null=False)
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
   
@@ -65,19 +66,23 @@ class Empleado(models.Model):
 #    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="PENDIENTE")
 
 class Interaccion(models.Model):
+    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"), ("PENDIENTE", "Pendiente"))
     fecha = models.DateField()
     observaciones = models.TextField()
     cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
+    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="EN PROCESO")
+
     def __str__(self):
         return f"{self.fecha}"
 
 class Visita(Interaccion):
-    CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"))
-    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="EN PROCESO")
+    carpeta = models.CharField(max_length=30, null=False)
 
 class Llamada(Interaccion):
-    CHOICES_ESTADO = (("REALIZADA", "Realizada"), ("PENDIENTE", "Pendiente"))
-    estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="PENDIENTE")
+    def __init__(self, *args, **kwargs):
+        super(Llamada, self).__init__(*args, **kwargs)
+        if self.estado == "EN PROCESO":
+            self.estado = "PENDIENTE"
 
 #signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwargs):
