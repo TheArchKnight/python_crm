@@ -81,8 +81,7 @@ class Visita(Interaccion):
 class Llamada(Interaccion):
     def __init__(self, *args, **kwargs):
         super(Llamada, self).__init__(*args, **kwargs)
-        if self.estado == "EN PROCESO":
-            self.estado = "PENDIENTE"
+        self.estado = "PENDIENTE"
 
 #signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwargs):

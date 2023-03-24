@@ -11,7 +11,8 @@ function datepicker(){
 
    let currentDate = `${year}-${month}-${day}`;
    console.log(currentDate)
-   $('.datepicker').datepicker({
+   $('.datepicker').datepicker
+   ({
       format: 'yyyy-mm-dd',
       startDate: currentDate,
       clearBtn: true,

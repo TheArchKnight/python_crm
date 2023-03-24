@@ -1,9 +1,8 @@
-from clientes.models import Interaccion
+from clientes.models import *
 
-
-def unica_fecha(fecha):
-    interacciones = Interaccion.objects.filter(fecha=fecha)
-    if len(interacciones) > 0:
-        return False
-    return True
-
+def definir_tipos(interaccion):
+    if isinstance(interaccion, Visita):
+        return "Visita"
+    elif isinstance(interaccion, Llamada):
+        return "Llamada"
+ 

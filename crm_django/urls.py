@@ -9,9 +9,10 @@ from crm_django.settings import STATIC_ROOT, STATIC_URL
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('clientes/', include('clientes.urls', namespace='clientes')),
+    path('fumigacion/', include('clientes.urls', namespace='clientes')),
     #path("visitas/", include("visitas.urls", namespace="visitas")),
     path("empleados/", include("empleados.urls", namespace="empleados")),
+    path("fachadas/", include('fachadas.urls', namespace='fachadas')),
 
     path("", LandingPageView.as_view(), name="landing-page" ),
     path("signup", SingupView.as_view(), name="signup"),

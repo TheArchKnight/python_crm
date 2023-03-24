@@ -1,11 +1,12 @@
 {% load static %}
 {% url 'landing-page' as landing_url %}
 {% url 'clientes:lista-cliente' as lista_url %}
+{% url 'fachadas:lista-obra' as fachadas_url %}
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-bs-theme="dark">
    <div class="container-fluid">
       {% comment "show the back button only no necessary pages." %}{% endcomment %}
-      {% if request.path != landing_url and request.path != lista_url%}
+      {% if request.path != landing_url and request.path != lista_url and request.path != fachadas_url%}
          <button onclick="location.href='{{previous}}'" class="btn btn-secondary" title="Volver a la pagina previa"><i class="bi bi-arrow-left-square"></i></button>
       {% endif %}
 
@@ -16,11 +17,12 @@
 
          <div class="navbar-nav">
             <img src="{% static 'img/logo-doctor-clean.png' %}" class="logo">
-            <!--
-            {% if request.user.is_authenticated %}
-               <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a> 
+            {% if request.user.is_authenticated%}
+               <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Fumigacion</a> 
+               <a class="nav-link " href="{% url 'fachadas:lista-obra' %}">Fachadas</a> 
+
             {% endif %}
-            -->
+
             {% if request.user.is_organisor %}
                <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
             {% endif %}

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "clientes",
     "empleados",
     "inventario",
+    "fachadas"
 ]
 
 MIDDLEWARE = [
@@ -157,7 +158,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
-LOGIN_REDIRECT_URL = "/clientes"
+LOGIN_REDIRECT_URL = "/fumigacion"
 LOGIN_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 CELERY_BROKER_URL = "redis://localhost:6379"

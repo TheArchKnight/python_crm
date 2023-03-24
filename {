@@ -9,7 +9,7 @@ from django.shortcuts import HttpResponse, redirect, render
 
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
-from clientes.functions import unica_fecha
+from clientes.functions import *
 from clientes.mixins import EmpleadoRequiredMixin
 
 #from clientes.forms import ClienteForm
@@ -70,16 +70,7 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
 class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     template_name = "clientes/detalles_clientes.html"
     form_class= InteraccionForm
-
-    def definir_tipos(self,interaccion):
-        if isinstance(interaccion, Visita):
-            return "Visita"
-        elif isinstance(interaccion, Llamada):
-            return "Llamada"
-    
-    def definir_visibilidad(self, interaccion):
-        if interaccion.fecha < datetime.today():
-            return "disabled"
+   
 
     def get_success_url(self):
         #Args receives a list with arguments
@@ -90,17 +81,17 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         visitas_cliente = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         llamadas = Llamada.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         interacciones_cliente= sorted(list(visitas_cliente) + list(llamadas), key=lambda x: x.fecha, reverse=True)
-        tipos = [self.definir_tipos(i) for i in interacciones_cliente]
+        tipos = [definir_tipos(i) for i in interacciones_cliente]
         visibilidades = ["disabled" if i.fecha > date.today() else "" for i in interacciones_cliente]
         interacciones_cliente = zip(interacciones_cliente, tipos, visibilidades)
         
-        visitas_todas = Visita.objects.filter(fecha__gte = datetime.today())
-        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_todas]
-        visitas_todas = visitas_todas.values("fecha", "cliente__nombre_orgnanizacion")
+        visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_orgnanizacion")
+#        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_vigentes]
 
-        for i in visitas_todas:
-            i["fecha"] = i.fecha.strftime("%Y-%m-%d")
-        print(visitas_todas)
+
+        for i in visitas_vigentes:
+            i["fecha"] = i["fecha"].strftime("%Y-%m-%d")
+
 
         #Update the context with our necessary queries
         context.update({
@@ -109,8 +100,8 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
             "interacciones_cliente": interacciones_cliente,
             "cliente":Cliente.objects.get(id=self.kwargs["pk"]),
             "previous":reverse("clientes:lista-cliente"), #Link to back button on navbar
-            "fechas_usadas":fechas_usadas,
-            "visitas_todas":json.dumps(list(visitas_todas))
+            #"fechas_usadas":fechas_usadas,
+            "visitas_vigentes":json.dumps(list(visitas_vigentes))
             }) 
         return context
 
@@ -156,6 +147,13 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super(ClienteCreateView, self).get_context_data(**kwargs)
+        context.update({
+            "previous":reverse("clientes:lista-cliente")
+            })
+        return context
 
     def form_valid(self, form):
         #Allow organisor users to assing clients to agents.
@@ -287,13 +285,13 @@ def finalizar_visita(request, pk):
 
     Llamada.objects.create(fecha=fecha_garantia, observaciones = "SEGUIMIENTO GARANTIA", cliente = cliente)
     cliente.save()
-    return redirect(f"/clientes/{cliente.id}")
+    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
 
 def finalizar_llamada(request, pk):
     llamada = Llamada.objects.get(id=pk)
     llamada.estado = "FINALIZADA"
     llamada.save()
-    return redirect(f"/clientes/{llamada.cliente.id}")
+    return redirect(reverse("clientes:detalles-cliente", args=[llamada.cliente.id]))
 
 def rechazo_cliente(request, cliente_pk, interaccion_pk):
     cliente = Cliente.objects.get(id=cliente_pk)
@@ -310,23 +308,19 @@ def rechazo_cliente(request, cliente_pk, interaccion_pk):
     llamada.estado = "FINALIZADA"
     llamada.save()
     cliente.save()
-    return redirect(f"/clientes/{cliente.id}")
+    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
 
 def reprogramar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
     if request.method == "POST":
         nueva_fecha = request.POST["nueva_fecha"]
-        if unica_fecha(nueva_fecha):
-            visita.fecha = nueva_fecha
-            src = os.path.join(visita.cliente.carpeta, visita.carpeta)
-            dst = os.path.join(visita.cliente.carpeta, nueva_fecha)
-            os.rename(src, dst)
-            visita.carpeta = nueva_fecha
-            visita.save()
-            request.session['nueva_fecha'] = True
-        else:
-            request.session['nueva_fecha'] = False
-
+        visita.fecha = nueva_fecha
+        src = os.path.join(visita.cliente.carpeta, visita.carpeta)
+        dst = os.path.join(visita.cliente.carpeta, nueva_fecha)
+        os.rename(src, dst)
+        visita.carpeta = nueva_fecha
+        visita.save()
+        
     return redirect(reverse("clientes:detalles-cliente", args=[visita.cliente.id]))
 
 def subir_archivo(request, cliente_pk, interaccion_pk):
@@ -337,6 +331,8 @@ def subir_archivo(request, cliente_pk, interaccion_pk):
         with open(f"{cliente.carpeta}/{visita.carpeta}/{f.name}", "wb+") as destination:
             for chunk in f.chunks():
                 destination.write(chunk)
+    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
+
     return redirect(f"/clientes/{cliente.id}")
 
 #def eliminar_cliente(request, pk):

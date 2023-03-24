@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content%}
+   <div style="text-align: center;">
+      <h1>{{obra.nombre_obra}}</h1>
+      <h3>Costo total de la obra:{{obra.costo_total}}</h3>
+      <form action="">
+         <label for="mes">Mes:</label>
+         <select name="mes" id="mes" onchange="selectMonth()">
+            {% for mes in meses_unicos  %}
+               <option value="{{mes}}" id="{{mes}}" data-url="{% url 'fachadas:detalles-obra' obra.pk mes 1 %}">{{mes}}</option>
+            {% endfor %}
+      
+         </select>
+      </form>
+
+   </div>
+   <div class="row my-1">
+      <div class="col-md-4">
+
+         {% include 'modals/pagar_nomina.html' with pk=obra.pk%}
+
+         <h4 class="text-center">
+            Trabajadores 
+            <button title="Añadir trabajador"class="btn btn-primary" onclick="location.href='{% url 'fachadas:crear-trabajador' obra.pk dict_fecha.año_mes dict_fecha.dia %}'"><i class="bi bi-person-fill-add"></i>
+            </button>
+
+            <button title="Pagar nomina" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalPagarNomina">
+               <i class="bi bi-currency-dollar"></i>
+            </button>
+
+         </h4>
+         <table class="table sticky my-2" style="height: 50%;">
+            <thead>
+               <th>Nombre</th>
+               <th>Cargo</th>
+               <th>Acumulado</th>
+
+            </thead>
+            <tbody>
+               {% for trabajador in trabajadores  %}
+                  <tr>
+                     <td>{{trabajador.nombre}}</td>
+                     <td>{{trabajador.cargo}}</td>
+                     <td>{{trabajador.acumulado}}</td>
+                  </tr>
+               {% endfor %}
+            </tbody>
+
+         </table>
+         <h4 class="text-center">Ultimo pago</h4>
+         <table class="table sticky my-2" style="height: 50%;">
+
+            <thead>
+               <th>Nombre</th>
+               <th>Cargo</th>
+               <th>Ultimo pago</th>
+
+            </thead>
+            <tbody>
+               {% for trabajador in trabajadores  %}
+                  <tr>
+                     <td>{{trabajador.nombre}}</td>
+                     <td>{{trabajador.cargo}}</td>
+                     <td>{{trabajador.ultimo_pago}}</td>
+                  </tr>
+               {% endfor %}
+            </tbody>
+
+         </table>
+      </div>
+      <div class="col-md-8">
+         <h4 class="text-center">
+            Costos
+            <button class="btn btn-primary" title="Añadir costo" onclick="location.href='{% url 'fachadas:crear-costo' obra.pk dict_fecha.año_mes dict_fecha.dia%}'"><i class="bi bi-clipboard2-plus"></i></button>
+
+         </h4>
+
+         <table class="table sticky my-2" style="height: 530px;">
+            <thead>
+               <th>Cantidad</th>
+               <th>Descripcion</th>
+               <th>Fecha</th>
+               <th>Responsable</th>
+               <th>Precio Unidad</th>
+               <th>Cobro Unidad</th>
+
+            </thead>
+            <tbody>
+               {% for costo in costos %}
+                  <tr>
+
+                     <td>{{costo.cantidad}}</td>
+                     <td>{{costo.descripcion}}</td>
+                     <td>{{costo.fecha}}</td>
+                     <td>{{costo.trabajador}}</td>
+                     <td>{{costo.precio_unidad}}</td>
+                     <td>{{costo.cobro_unidad}}</td>
+                  </tr>
+
+               {% endfor %}
+
+            </tbody>
+         </table>
+         <div style="text-align: center;">
+            {% for dia in dias %}
+               <a href="{% url 'fachadas:detalles-obra' obra.pk dict_fecha.año_mes dia %}">{{dia}}</a>
+            {% endfor %}
+
+         </div>
+      </div>
+
+   </div>
+{% endblock content %}
