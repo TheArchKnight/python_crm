@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content%}
+
+   {% include 'modals/pagar_nomina.html' %}
+   {% include 'modals/filtrar_pagos.html' %}
+
    <div style="text-align: center;">
       <h1>{{obra.nombre_obra}}</h1>
       <h3>Costo total de la obra:{{obra.costo_total}}</h3>
@@ -8,9 +12,8 @@
          <label for="mes">Mes:</label>
          <select name="mes" id="mes" onchange="selectMonth()">
             {% for mes in meses_unicos  %}
-               <option value="{{mes}}" id="{{mes}}" data-url="{% url 'fachadas:detalles-obra' obra.pk mes 1 %}">{{mes}}</option>
-            {% endfor %}
-      
+               <option value="{{mes}}" id="{{mes}}" data-url="{% url 'fachadas:detalles-obra' obra.pk mes 32 %}">{{mes}}</option>
+            {% endfor %} 
          </select>
       </form>
 
@@ -18,7 +21,6 @@
    <div class="row my-1">
       <div class="col-md-4">
 
-         {% include 'modals/pagar_nomina.html' with pk=obra.pk%}
 
          <h4 class="text-center">
             Trabajadores 
@@ -48,21 +50,29 @@
             </tbody>
 
          </table>
-         <h4 class="text-center">Ultimo pago</h4>
+         <h4 class="text-center">Ultimo pago
+            <button class="btn btn-secondary" title="Filtrar pagos" data-bs-toggle="modal" data-bs-target="#modalFiltrarPagos">
+               <i class="bi bi-search"></i>
+            </button>
+
+
+         </h4>
          <table class="table sticky my-2" style="height: 50%;">
 
             <thead>
                <th>Nombre</th>
                <th>Cargo</th>
-               <th>Ultimo pago</th>
+               <th>Periodo</th>
+               <th>Monto</th>
 
             </thead>
             <tbody>
-               {% for trabajador in trabajadores  %}
+               {% for trabajador, pago in trabajadores_pagos  %}
                   <tr>
                      <td>{{trabajador.nombre}}</td>
                      <td>{{trabajador.cargo}}</td>
-                     <td>{{trabajador.ultimo_pago}}</td>
+                     <td>{{pago.periodo}}</td>
+                     <td>{{pago.monto}}</td>
                   </tr>
                {% endfor %}
             </tbody>
@@ -76,12 +86,16 @@
 
          </h4>
 
-         <table class="table sticky my-2" style="height: 530px;">
+         <table class="table sticky my-2" style="height: 530px;" id="clientes-table">
             <thead>
-               <th>Cantidad</th>
-               <th>Descripcion</th>
-               <th>Fecha</th>
-               <th>Responsable</th>
+               <th col-index=1>Cantidad</th>
+               <th col-index=2>Descripcion</th>
+               <th col-index=3>Fecha</th>
+               <th col-index=4>Responsable
+                  <select  class="table-filter form-select text-center" onchange="filter_rows()">
+                     <option value="all">Todos</option>
+                  </select>
+               </th>
                <th>Precio Unidad</th>
                <th>Cobro Unidad</th>
 

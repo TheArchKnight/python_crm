@@ -31,7 +31,6 @@ class CostoForm(forms.Form):
     tipo = forms.ChoiceField(widget=forms.Select(attrs={"class":"form-control", "onchange":"select_form()"}), choices=modelos)
     descripcion = forms.CharField(widget = forms.TextInput(attrs=dict))
     cantidad = forms.IntegerField(widget = forms.NumberInput(attrs=dict))
-    fecha = forms.DateField(widget=forms.DateInput(attrs={"class":"form-control", "type":"date"}))
     precio_unidad = forms.FloatField(widget=forms.NumberInput(attrs=dict)) 
     cobro_unidad = forms.FloatField(widget=forms.NumberInput(attrs=dict))
 
@@ -39,13 +38,12 @@ class CostoForm(forms.Form):
         obra = kwargs.pop("obra",0)
         trabajadores =  Trabajador.objects.filter(obra=obra)
         super(CostoForm, self).__init__( *args, **kwargs)
+        dict_fecha = self.dict
+        dict_fecha.update({"type": "date", "min": obra.fecha_inicio.strftime("%Y-%m-%d")})
+        self.fields["fecha"] = forms.DateField(widget=forms.DateInput(attrs=dict_fecha))
+
         self.fields["trabajador"] = forms.ModelChoiceField(queryset=trabajadores, label="", empty_label="Seleccione el trabajador", widget=forms.Select(attrs={"class":"form-control", "style": "display:none;"}))
         self.fields["trabajador"].required = False
-
-class MesForm(forms.Form):
-    mes = forms.CharField(widget=forms.Select(attrs={}))
-
-
 
 class TrabajadorModelForm(forms.ModelForm):
     class Meta:

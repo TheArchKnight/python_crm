@@ -1,0 +1,27 @@
+<!-- Modal filtrar pagos-->
+<div class="modal fade" id="modalFiltrarPagos" tabindex="-1" aria-labelledby="modalFiltrarPagosLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalFiltrarPagosLabel">Filtrar pagos</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <div class="text-center" style="text-align: center;">
+               Selecciona el periodo para buscar los pagos 
+               <form action="{% url 'fachadas:filtrar-pagos' obra.pk%}" method="post" name="filtrar_pagos" id="filtrar_pagos">
+                  {% csrf_token %}
+                  Inicio: <input type="date" name="inicio_pago" >
+                  Final: <input type="date" name="final_pago">
+               </form>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" form="filtrar_pagos" class="btn btn-success">Filtrar Pagos</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+

@@ -15,6 +15,7 @@ class Obra(models.Model):
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
     fecha_inicio = models.DateField(null=False, default=date.today)
     costo_total = models.FloatField(default=0)
+    fecha_ultimo_pago = models.CharField(max_length=25, default=0)
 
     def __str__(self):
         return f"{self.nombre_obra}"
@@ -40,11 +41,17 @@ class Trabajador(models.Model):
     cargo = models.CharField(max_length=30,choices = CHOICES_TIPO)
     obra = models.ForeignKey("fachadas.Obra", on_delete=models.SET_NULL, null=True)
     acumulado = models.FloatField(default=0)
-    ultimo_pago = models.FloatField(default=0)
-    fecha_ultimo_pago = models.FloatField(default=0)
-
-
+    
     def __str__(self):
         return f"{self.nombre}"
 
+class Pago(models.Model):
+    fecha = models.DateField(null=False)
+    periodo_inicio = models.DateField()
+    periodo_final = models.DateField()
+    monto = models.FloatField()
+    trabajador = models.ForeignKey("fachadas.Trabajador", on_delete=models.CASCADE, null=False)
+    obra = models.ForeignKey("fachadas.Obra", on_delete=models.CASCADE, null=False)
+    def __str__(self):
+        return f"{self.monto}"
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from django import forms
 from django.db.models.expressions import NoneType
 from django.forms import DateField, DateInput, PasswordInput, widgets
@@ -16,7 +16,14 @@ class InteraccionForm(forms.Form):
         ultima_visita = kwargs.pop("ultima_visita", 0)
         super(InteraccionForm, self).__init__( *args, **kwargs)
         dict = {"class": "form-control", "type": "date"} 
-        if ultima_visita == None:
+        
+        condicion = False
+        try:
+            condicion =ultima_visita.fecha < date.today()
+        except:
+            pass
+
+        if condicion or ultima_visita == None:
             dict["min"] = datetime.today().strftime("%Y-%m-%d")
         else:
             dict["min"] = (ultima_visita.fecha + timedelta(days=1)).strftime("%Y-%m-%d")

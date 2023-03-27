@@ -2,7 +2,7 @@ from datetime import datetime
 import os
 from shutil import rmtree
 from django.shortcuts import redirect, render, reverse
-from django.views.generic import CreateView, DeleteView, FormView, ListView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView
 from clientes.models import Empleado
 from fachadas.models import *
 from fachadas.forms import *
@@ -11,13 +11,11 @@ from fachadas.functions import *
 
 CARPETA_FACHADAS = "/home/anorak/Test/Fachadas/"
 
-
 class ObraListView(ListView):
     template_name = "fachadas/lista_fachadas.html"
 
     def get_queryset(self):
         return Obra.objects.all()
-
 
     def get_context_data(self, **kwargs):
         context = super(ObraListView, self).get_context_data(**kwargs)
@@ -52,31 +50,45 @@ class ObraCreateView(CreateView):
         os.mkdir(CARPETA_FACHADAS + form.instance.nombre_obra)
         return super(ObraCreateView, self).form_valid(form)
 
-class ObraDetailView(FormView):
+class ObraDetailView(DetailView):
     template_name = "fachadas/detalles_obra.html"
-    form_class = MesForm
+    pk_url_kwarg = "obra_pk"
+    queryset = Obra.objects.all()
 
     def get_success_url(self):
         return reverse("fachadas:detalles-obra", args=[self.kwargs["obra_pk"]])
 
+    def get(self, request, *args, **kwargs):
+        if kwargs["dia"] == "32":
+            obra = self.get_object()
+            dict_fecha = unir_fecha(kwargs) 
+            costos_dict = costos_mes(dict_fecha, obra)
+            dia_maximo = costos_dict["dias_mes"][0]
+            return redirect("fachadas:detalles-obra", self.kwargs["obra_pk"], self.kwargs["año_mes"], dia_maximo)
+        return super(ObraDetailView, self).get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super(ObraDetailView, self).get_context_data(**kwargs)
-        trabajadores = Trabajador.objects.filter(obra_id = self.kwargs["obra_pk"])
-        obra = Obra.objects.get(id=self.kwargs["obra_pk"])
+        obra = self.get_object()
+        trabajadores = Trabajador.objects.filter(obra = obra)
+        pagos = Pago.objects.filter(obra=obra, fecha=obra.fecha_ultimo_pago)
+        try:
+            pagos = [pagos.get(trabajador=i) for i in trabajadores] 
+        except:
+            pass
+        trabajadores_pagos = zip(trabajadores, pagos)
+
         dict_fecha = unir_fecha(self.kwargs)
-        #Get all the costs, no matter the date 
-        costos = Costo.objects.filter(obra = obra).order_by("-fecha")
-        #filter the costs searching for the ones of an exact day of a month
-        costos_display = costos.filter(fecha=dict_fecha["fecha"])
-        #queryset of costs related to a certain month and year
-        costos_mes = costos.filter(fecha__year=dict_fecha["fecha"].year, fecha__month=dict_fecha["fecha"].month)
-        dias_mes = [i["fecha"].strftime("%d") for i in costos_mes.values("fecha").annotate(n = models.Count("pk"))]  
-        meses_unicos = [i["fecha"].strftime("%Y-%m") for i in costos.values("fecha").annotate(n = models.Count("pk"))]
+        costos_dict = costos_mes(dict_fecha, obra)
+        costos_display = costos_dict["costos"].filter(fecha=dict_fecha["fecha"]) 
+        meses_unicos = [i["fecha"].strftime("%Y-%m") for i in costos_dict["costos"].values("fecha").annotate(n = models.Count("pk"))]
         meses_unicos = valores_unicos(meses_unicos)
+
         try:
             meses_unicos.remove(dict_fecha["año_mes"])
         except:
             pass
+
         meses_unicos.insert(0, dict_fecha["año_mes"])
         #expenses to be disaplayed on the web page
         costos_display = asignar_acciones(costos_display, obra, dict_fecha["fecha"])
@@ -86,9 +98,10 @@ class ObraDetailView(FormView):
             "obra":obra,
             "trabajadores": trabajadores,
             "costos":costos_display,
-            "dias":dias_mes,
+            "dias":costos_dict["dias_mes"],
             "dict_fecha":dict_fecha,
-            "meses_unicos":meses_unicos
+            "meses_unicos":meses_unicos,
+            "trabajadores_pagos":trabajadores_pagos
             })
         return context
 
@@ -116,8 +129,10 @@ def pagar_nomina(request, pk, año_mes, dia):
             acciones = Accion.objects.filter(trabajador=trabajador, fecha__gte=inicio_nomina, fecha__lte=final_nomina)
             valor_nomina = sum([i.precio_unidad * i.cantidad for i in acciones])
             trabajador.acumulado -= valor_nomina
-            trabajador.ultimo_pago = valor_nomina
+            obra.fecha_ultimo_pago = date.today() 
+            Pago.objects.create(fecha=date.today(), monto=valor_nomina, periodo_inicio=inicio_nomina, periodo_final=final_nomina, trabajador=trabajador, obra=obra)
             trabajador.save()
+            obra.save()
 
     return redirect(reverse("fachadas:detalles-obra", args=[pk, año_mes, dia]))
 
@@ -128,7 +143,6 @@ class CostoCreateView(FormView):
     def get_success_url(self):
         dict = unir_fecha(self.kwargs)
         return reverse("fachadas:detalles-obra", args=[self.kwargs["pk"], dict["año_mes"], dict["dia"]])
-
 
     def get_form_kwargs(self):
         #pass kwarg with last visit
@@ -169,11 +183,9 @@ class TrabajadorCreateView(CreateView):
     template_name="fachadas/crear_trabajador.html"
     form_class = TrabajadorModelForm
 
-
     def get_success_url(self):
         dict = unir_fecha(self.kwargs)
         return reverse("fachadas:detalles-obra", args=[self.kwargs["pk"], dict["año_mes"], dict["dia"]])
-
 
     def get_context_data(self, **kwargs):
         context = super(TrabajadorCreateView, self).get_context_data(**kwargs)
@@ -187,4 +199,20 @@ class TrabajadorCreateView(CreateView):
         obra = Obra.objects.get(id=self.kwargs["pk"])
         form.instance.obra = obra
         return super().form_valid(form)
+
+
+def filtrar_pagos(request, obra_pk):
+    obra = Obra.objects.get(id=obra_pk)
+    pagos = []
+    if request.method == "POST":
+        inicio_pago = request.POST["inicio_pago"] 
+        final_pago = request.POST["final_pago"]
+        periodo = inicio_pago + "/" + final_pago
+        pagos = Pago.objects.filter(obra=obra, periodo=periodo)
+        return redirect(reverse("fachadas:filtrar-pagos", args=[obra_pk]))
+    return render(request, "fachadas/filtrar_pagos.html", {
+           "pagos": pagos,
+           "obra": obra,
+           })
+
 

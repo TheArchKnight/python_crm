@@ -9,15 +9,15 @@
 
             <h1>{{cliente}}</h1>
             <h3>{{cliente.direccion}}</h3>
-            <h4>Estado del cliente: {{cliente.estado}}</h4>
+            <h5>Estado del cliente: {{cliente.estado}}</h5>
 
             {% if cliente.estado == "ACTIVO" %}      
                {% with visitas_cliente|first as visita %}
-                  <h4>Estado de la ultima visita: {{visita.estado}}</h4>
+                  <h5>Estado de la ultima visita: {{visita.estado}}</h5>
                {% endwith %}
             {% endif %}
             {% if cliente.fecha_vencimiento != None %}
-               <h4>Vencimiento: {{cliente.fecha_vencimiento}}</h4>
+               <h5>Vencimiento: {{cliente.fecha_vencimiento}}</h5>
             {% endif %}
             <div class="text-center">
 
@@ -52,6 +52,7 @@
             <form method="post">
                {% csrf_token %}
                {{form.as_p}}
+               <div id="fecha_repetida_form" class="text-center"></div>
                <div class="text-center">
                   <button type="submit" class="btn btn-success"> Guardar</button>
                </div>

@@ -1,35 +1,47 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from crm_django.celery import app
 from django.core.mail import send_mail
-from clientes.models import Empleado, Cliente, Visita
-@app.task
-def send_notifications():
-    queryset = Empleado.objects.all()
-    for empleado in queryset:
-        clientes_vencimiento = Cliente.objects.filter(fecha_vencimiento=datetime.today(), empleado = empleado, estado="ACTIVO")
-        clientes_llamada = Cliente.objects.filter(fecha_llamada=datetime.today(), empleado=empleado, estado="ACTIVO")
-        if len(clientes_vencimiento) > 0 or len(clientes_llamada) > 0:
-            body_email = "¡Hola {empleado.user.username}!\n"
-            for cliente in clientes_vencimiento:
-                cliente.estado_servicio = "VENCIDO"
-                cliente.save()
-                body_email += f"El dia de hoy, {len(clientes_vencimiento)} clientes han superado los terminos de tiempo con nuestros servicios. A continuacion encontraras algunos detalles de estos clientes, puedes visualizarlos mas a detalles en el CRM.\n\n"
-    
-                visita = Visita.objects.filter(cliente = cliente).first()
-                body_email += f"Nombre: {cliente.nombre_orgnanizacion}\nDireccion: {cliente.direccion}\nFrecuencia de visitas (meses): {cliente.frecuencia_meses}\nUltima visita: {visita.fecha}\n\n"
-            for cliente in clientes_llamada:
-                body_email += f"El dia de hoy, {len(clientes_llamada)} deben de ser llamados para programar una proxima visita, ya que no accedieron al servicio una vez se habian vencido los terminos. A continuacion encontraras algunos detalles de estos clientes, puedes visualizarlos mas a detalles en el CRM.\n\n"
-                visita = Visita.objects.filter(cliente = cliente).first()
-                body_email += f"Nombre: {cliente.nombre_orgnanizacion}\nDireccion: {cliente.direccion}\nFrecuencia de visitas (meses): {cliente.frecuencia_meses}\nUltima visita: {visita.fecha}\nFecha de vencimiento: {cliente.fecha_vencimiento}\n"
-            send_mail("Clientes con vencimiento de terminos", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
+from clientes.models import Empleado, Cliente, Llamada, Visita
+from fachadas.functions import *
 
 @app.task
-def garantias():
-    fecha_garantia = datetime.today - timedelta(days=15)
-    visitas_garantia = Visita.objects.filter(fecha=fecha_garantia, estado="FINALIZADA")
-    for visita in visitas_garantia:
-        cliente = Cliente.objects.get(id=visita.cliente.id)
-        empleado = Empleado.objects.get(id=cliente.empleado.id)
+def visitas():
+    empleados = Empleado.objects.all()
+    for empleado in empleados:
+        fecha = date.today()
+        fecha_string = date.today().strftime("%Y-%m-%d")
+        visitas = Visita.objects.filter(empleado=empleado, fecha=fecha)
+        print(visitas)
+        body_email = ''
+        if len(visitas) > 0:
+            body_email += f"Hola {empleado.user.username}\n"
+            body_email += f"El dia de hoy, {len(visitas)} tienen una visita programada. Puedes visualizar mas a detalles en el CRM.\n\n"
+            for visita in visitas:
+                body_email += f"Nombre: {visita.cliente.nombre_orgnanizacion}\nDireccion: {visita.cliente.direccion}\nFrecuencia de visitas (meses): {visita.cliente.frecuencia_meses}\nObservaciones: {visita.observaciones}\n\n"
+            print(body_email)
+            send_mail(f"Visitas de fumigacion {fecha_string}", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
+
+
+@app.task
+def llamadas():
+    empleados =  Empleado.objects.all()
+    for empleado in empleados:
+        fecha = date.today()
+        fecha_string = fecha.strftime("%Y-%m-%d")
+        llamadas = Llamada.objects.filter(empleado = empleado, fecha=fecha)
+        body_email=''
+        if len(llamadas) > 0:
+            body_email += f"¡Hola {empleado.user.username}!\n"
+            body_email += f"El dia de hoy, {len(llamadas)} llamadas deben de ser realizadas. Puedes visualizar mas a detalles en el CRM.\n\n"
+            for llamada in llamadas:
+                visita = Visita.objects.filter(cliente = llamada.cliente).first() 
+                body_email += f"Nombre: {llamada.cliente.nombre_orgnanizacion}\nDireccion: {llamada.cliente.direccion}\nFrecuencia de visitas (meses): {llamada.cliente.frecuencia_meses}\nUltima visita: {visita.fecha}\nMotivo de la llamada: {llamada.observaciones}\n\n"
+            send_mail(f"Llamadas clientes {fecha_string}", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
+
+
+            
+
+
 
 
 

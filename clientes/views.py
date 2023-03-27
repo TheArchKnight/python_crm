@@ -19,6 +19,10 @@ from .forms import *
 
 import os
 import json
+
+CARPETA_FUMIGACION = "/home/anorak/Test/Fumigacion/"
+
+
 class SingupView(CreateView):
     template_name="registration/register.html"
     form_class = CustomUserCreationForm
@@ -120,11 +124,11 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     #our form is a generic one which can be used for creating multiple subclasses of the interaction parent class
         if form.cleaned_data["tipo"] == "VISITA":
             carpeta = fecha.strftime('%Y-%m-%d')
-            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente, carpeta=carpeta)
+            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
             if visitas.count() == 0:
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
-            os.mkdir(os.path.join(cliente.carpeta, carpeta))
+            os.mkdir(os.path.join(CARPETA_FUMIGACION, cliente.nombre_orgnanizacion, carpeta))
             if cliente.estado == "INACTIVO":
                 cliente.estado = "ACTIVO"
             cliente.save()
@@ -162,8 +166,8 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         else:
             form.instance.empleado = Empleado.objects.get(user = self.request.user)
-        form.instance.carpeta = ("/home/anorak/Test/" + form.instance.nombre_orgnanizacion)
-        os.mkdir(form.instance.carpeta)
+        ruta = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
+        os.mkdir(ruta)
         
     
         return super(ClienteCreateView, self).form_valid(form)
@@ -197,9 +201,8 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
-        src = os.path.join(form.instance.carpeta, "")
-        form.instance.carpeta = "/home/anorak/Test/" + form.instance.nombre_orgnanizacion
-        dst = os.path.join(form.instance.carpeta, "")
+        src = os.path.join(CARPETA_FUMIGACION, self.get_object().nombre_orgnanizacion)
+        dst = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
         os.rename(src, dst)
 
         return super(ClienteUpdateView, self).form_valid(form) 
@@ -212,7 +215,8 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         instance = Cliente.objects.get(id=self.kwargs["pk"])
-        rmtree(instance.carpeta)
+        carpeta = os.path.join(CARPETA_FUMIGACION, instance.nombre_orgnanizacion)
+        rmtree(carpeta)
 
         handler = getattr(self, 'delete')
         return handler(request, *args, **kwargs)
@@ -301,7 +305,7 @@ def rechazo_cliente(request, cliente_pk, interaccion_pk):
     #ser un cliente INACTIVO
     if cliente.rechazos < 3:
         fecha = date.today() + rd.relativedelta(days=15)
-        Llamada.objects.create(fecha = fecha, cliente=cliente)
+        Llamada.objects.create(fecha = fecha, cliente=cliente, observaciones=llamada.observaciones)
     else:
         cliente.estado = "INACTIVO"
 
@@ -313,12 +317,12 @@ def rechazo_cliente(request, cliente_pk, interaccion_pk):
 def reprogramar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
     if request.method == "POST":
+        carpeta_cliente = os.path.join(CARPETA_FUMIGACION, visita.cliente.nombre_orgnanizacion)
+        src = os.path.join(carpeta_cliente, visita.fecha.strftime("%Y-%m-%d"))
         nueva_fecha = request.POST["nueva_fecha"]
         visita.fecha = nueva_fecha
-        src = os.path.join(visita.cliente.carpeta, visita.carpeta)
-        dst = os.path.join(visita.cliente.carpeta, nueva_fecha)
+        dst = os.path.join(carpeta_cliente, nueva_fecha)
         os.rename(src, dst)
-        visita.carpeta = nueva_fecha
         visita.save()
         
     return redirect(reverse("clientes:detalles-cliente", args=[visita.cliente.id]))
@@ -328,7 +332,7 @@ def subir_archivo(request, cliente_pk, interaccion_pk):
     cliente = Cliente.objects.get(id=cliente_pk)
     files = request.FILES.getlist("files")
     for f in files:
-        with open(f"{cliente.carpeta}/{visita.carpeta}/{f.name}", "wb+") as destination:
+        with open(f"{CARPETA_FUMIGACION}/{cliente.nombre_orgnanizacion}/{visita.fecha}/{f.name}", "wb+") as destination:
             for chunk in f.chunks():
                 destination.write(chunk)
     return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))

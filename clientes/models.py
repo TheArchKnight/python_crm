@@ -36,7 +36,6 @@ class Cliente(models.Model):
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
     rechazos = models.IntegerField(default=0, null=False)
     estado_servicio = models.CharField(max_length=15, choices=CHOICES_SERVICIO)
-    carpeta = models.CharField(max_length=30, null=False)
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
   
@@ -71,17 +70,18 @@ class Interaccion(models.Model):
     observaciones = models.TextField()
     cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
     estado = models.CharField(max_length=15, choices=CHOICES_ESTADO, default="EN PROCESO")
+    empleado = models.ForeignKey("clientes.Empleado", on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.fecha}"
 
 class Visita(Interaccion):
-    carpeta = models.CharField(max_length=30, null=False)
-
+    pass
 class Llamada(Interaccion):
     def __init__(self, *args, **kwargs):
         super(Llamada, self).__init__(*args, **kwargs)
-        self.estado = "PENDIENTE"
+        if self.estado=="EN PROCESO":
+            self.estado = "PENDIENTE"
 
 #signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwargs):

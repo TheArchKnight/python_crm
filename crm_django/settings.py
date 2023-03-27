@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_extensions",
     "clientes",
     "empleados",
     "inventario",
@@ -166,9 +167,17 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TIMEZONE = "America/Bogota"
 
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
-    "send_notifications" : {
-        "task" : "clientes.tasks.send_notifications",
-        "schedule" : crontab('0', '7', '1-5'),
+   # "send_notifications" : {
+    #    "task" : "clientes.tasks.send_notifications",
+     #   "schedule" : crontab('0', '7', '1-5'),
 
-    }
+    #}
+    "garantias" : {
+        "task" : "clientes.tasks.llamadas",
+        "schedule" : crontab('0', '7', '1-6' )
+        },
+    "visitas": {
+        "task" : "clientes.tasks.visitas",
+        "schedule" : 10  
+        }
 }

@@ -10,5 +10,6 @@ urlpatterns = [
     path("eliminar-obra/<int:pk>", ObraDeleteView.as_view(), name="eliminar-obra"),
     path("<int:pk>/<str:año_mes>/<str:dia>/añadir-costo/", CostoCreateView.as_view(), name="crear-costo"),
     path("<int:pk>/<str:año_mes>/<str:dia>/añadir-trabajador", TrabajadorCreateView.as_view(), name="crear-trabajador"),
-    path("<int:pk>/<str:año_mes>/<str:dia>/pagar_nomina", pagar_nomina, name="pagar-nomina")
+    path("<int:pk>/<str:año_mes>/<str:dia>/pagar_nomina", pagar_nomina, name="pagar-nomina"),
+    path("<int:obra_pk>/pagos/", filtrar_pagos, name="filtrar-pagos")
     ]
