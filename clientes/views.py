@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
 from clientes.functions import *
 from clientes.mixins import EmpleadoRequiredMixin
+from functions import *
 
 #from clientes.forms import ClienteForm
 from .models import Cliente, Empleado, Llamada
@@ -35,7 +36,6 @@ class SingupView(CreateView):
         form.save()
         return super().form_valid(form)
 
-
 class LandingPageView(LoginView):
     form_class = LoginForm  
     template_name = "landing.html"
@@ -43,28 +43,28 @@ class LandingPageView(LoginView):
     def get(self, request, *args, **kwargs):
         #Redirect user to the clients app if it's authenticated.
         if request.user.is_authenticated:
-            if request.user.inventario and not (request.user.fachadas or request.user.fumigacion):
-                return redirect("inventario:lista")
-            else:
+            if request.user.fachadas:
+                return redirect("fachadas:lista-obra")
+            elif request.user.fumigacion:
                 return redirect("clientes:lista-cliente")
         return super(LandingPageView, self).get(request, *args, **kwargs)
-
-
 
 class ClienteListView( EmpleadoRequiredMixin ,ListView):
     template_name = "clientes/lista_clientes.html"
     context_object_name = "clientes"
-    
+    queryset = Cliente.objects.all()   
+    object_list = Cliente.objects.all()
 
-    #Queryset for the clients assigned to the user.
-    #Users with only acces to the inventory are not allowed
-    #to review clients information
-    def get_queryset(self):
-        queryset = Cliente.objects.all()
-        if self.request.user.fachadas or self.request.user.fumigacion:
-            queryset = queryset.filter(empleado__user=self.request.user)
-        return queryset
-
+    def post(self, request, **kwargs):
+        searched = request.POST["searched"]
+        filtro = request.POST["filtro"]
+        clientes = []
+        if filtro == "nombre":
+            clientes = self.object_list.filter(nombre_orgnanizacion__icontains=searched)
+        elif filtro == "administrador":
+            clientes = self.object_list.filter(administrador__icontains=searched)
+        context = {"clientes":clientes}
+        return super(ClienteListView, self,).render_to_response(context)
 
 
 #This view provides details of the client model, as well as 
@@ -75,7 +75,6 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     template_name = "clientes/detalles_clientes.html"
     form_class= InteraccionForm
    
-
     def get_success_url(self):
         #Args receives a list with arguments
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
@@ -91,11 +90,8 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         
         visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_orgnanizacion")
 #        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_vigentes]
-
-
         for i in visitas_vigentes:
             i["fecha"] = i["fecha"].strftime("%Y-%m-%d")
-
 
         #Update the context with our necessary queries
         context.update({
@@ -128,7 +124,9 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
             if visitas.count() == 0:
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
-            os.mkdir(os.path.join(CARPETA_FUMIGACION, cliente.nombre_orgnanizacion, carpeta))
+            
+            ruta = os.path.join(CARPETA_FUMIGACION, cliente.nombre_orgnanizacion, carpeta)
+            create_folder(ruta)
             if cliente.estado == "INACTIVO":
                 cliente.estado = "ACTIVO"
             cliente.save()
@@ -167,7 +165,7 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
         else:
             form.instance.empleado = Empleado.objects.get(user = self.request.user)
         ruta = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
-        os.mkdir(ruta)
+        create_folder(ruta)
         
     
         return super(ClienteCreateView, self).form_valid(form)
@@ -216,7 +214,10 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
     def dispatch(self, request, *args, **kwargs):
         instance = Cliente.objects.get(id=self.kwargs["pk"])
         carpeta = os.path.join(CARPETA_FUMIGACION, instance.nombre_orgnanizacion)
-        rmtree(carpeta)
+        try:
+            rmtree(carpeta)
+        except:
+            pass
 
         handler = getattr(self, 'delete')
         return handler(request, *args, **kwargs)
@@ -265,13 +266,13 @@ class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
     def get_success_url(self):
         return reverse("clientes:detalles-cliente", args=[Cliente.objects.filter(visita = self.kwargs["pk"]).first().id])
 
-def search_clientes(request):
-    if request.method == "POST":
-        searched = request.POST["searched"]
-        clientes = Cliente.objects.filter(nombre_orgnanizacion__icontains=searched)
-        return render(request, "search_clientes.html", {"searched": searched, "clientes": clientes})
-    else:
-        return render(request, "search_clientes.html", {})
+#def search_clientes(request):
+#    if request.method == "POST":
+#        searched = request.POST["searched"]
+#        clientes = Cliente.objects.filter(nombre_orgnanizacion__icontains=searched)
+#        return render(request, "search_clientes.html", {"searched": searched, "clientes": clientes})
+#    else:
+#        return render(request, "search_clientes.html", {})
 
 def finalizar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
@@ -327,17 +328,15 @@ def reprogramar_visita(request, pk):
         
     return redirect(reverse("clientes:detalles-cliente", args=[visita.cliente.id]))
 
-def subir_archivo(request, cliente_pk, interaccion_pk):
-    visita = Visita.objects.get(id=interaccion_pk)
-    cliente = Cliente.objects.get(id=cliente_pk)
-    files = request.FILES.getlist("files")
-    for f in files:
-        with open(f"{CARPETA_FUMIGACION}/{cliente.nombre_orgnanizacion}/{visita.fecha}/{f.name}", "wb+") as destination:
-            for chunk in f.chunks():
-                destination.write(chunk)
-    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
-
-    return redirect(f"/clientes/{cliente.id}")
+#def subir_archivo(request, cliente_pk, interaccion_pk):
+#    visita = Visita.objects.get(id=interaccion_pk)
+#    cliente = Cliente.objects.get(id=cliente_pk)
+#    files = request.FILES.getlist("files")
+#    path = f"{CARPETA_FUMIGACION}/{cliente.nombre_orgnanizacion}/{visita.fecha}"
+#    write_file(files, path)
+#    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
+#
+#    return redirect(f"/clientes/{cliente.id}")
 
 #def eliminar_cliente(request, pk):
 #    cliente = Cliente.objects.get(id=pk)

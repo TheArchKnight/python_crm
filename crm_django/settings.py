@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     "clientes",
     "empleados",
     "inventario",
-    "fachadas"
+    "fachadas",
+    "general_usage"
 ]
 
 MIDDLEWARE = [
@@ -159,7 +160,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
-LOGIN_REDIRECT_URL = "/fumigacion"
+LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 CELERY_BROKER_URL = "redis://localhost:6379"
@@ -174,10 +175,10 @@ CELERY_BEAT_SCHEDULE = { # scheduler configuration
     #}
     "garantias" : {
         "task" : "clientes.tasks.llamadas",
-        "schedule" : crontab('0', '7', '1-6' )
+        "schedule" : crontab('0', '7', '1-6')
         },
     "visitas": {
         "task" : "clientes.tasks.visitas",
-        "schedule" : 10  
+        "schedule" : crontab('0', '7', '1-6') 
         }
 }

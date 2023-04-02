@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+   <table class="table sticky" id="clientes-table">
+      <thead>
+         <th col-index=1>Codigo general</th>
+         <th col-index=2>Descripcion</th>
+         <th col-index=3>Categoria
+            <select class="table-filter form-select text-center" onchange="filter_rows()">
+               <option value="all">Todos</option>
+            </select>
+
+         </th>
+         <th>Fecha de registro</th>
+      </thead>
+
+      <tbody>
+         {% for elemento in elementos  %}
+            <tr>
+               <td><a href="{% url 'inventario:detalles-elemento' elemento.pk %}">
+                     {{elemento.codigo_general}}
+                  </a></td>
+                  <td>{{elemento.descripcion}}</td> 
+                  <td>{{elemento.categoria}}</td>
+                  <td>{{elemento.fecha}}</td>
+            </tr>
+         {% endfor %}
+      </tbody>
+
+   </table>
+   <hr>
+   <div class="text-center">
+      <a class="btn btn-success" href="{% url 'inventario:crear-elemento' %}">Registrar elemento</a> 
+   </div>
+
+{% endblock content %}

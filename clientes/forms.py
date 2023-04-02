@@ -37,6 +37,8 @@ class ClienteModelForm(forms.ModelForm):
                 'nombre_orgnanizacion',
                 'direccion',
                 'nit',
+                "administrador",
+                'telefono',
                 'correo',
                 'frecuencia_meses',
                 "estado"
@@ -44,9 +46,11 @@ class ClienteModelForm(forms.ModelForm):
         widgets = {
                 'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
                 'direccion': forms.TextInput(attrs={"class":'form-control'}),
-                'nit': forms.NumberInput(attrs={"class":'form-control'}),
+                'nit': forms.TextInput(attrs={"class":'form-control'}),
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
                 'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
+                "administrador":forms.TextInput(attrs={"class":'form-control'}),
+                "telefono":forms.NumberInput(attrs={"class":'form-control'}),
                 "estado": forms.Select(attrs={"class":"form-control"})
                 }
     def __init__(self, *args, **kwargs):

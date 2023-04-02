@@ -1,6 +1,4 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
 
    <div class="row">
@@ -24,21 +22,17 @@
                <a href="{% url 'clientes:actualizar-cliente' cliente.pk%}" class="btn btn-warning" title="Editar">
                   <i class="bi bi-clipboard2-plus"></i>
                </a>                                                
-
-               {% include "modals/eliminar_cliente.html" with pk=cliente.pk %}
+               {% url 'clientes:eliminar-cliente' cliente.pk as eliminar_url%} 
+               {% include "modals/eliminar_cliente.html" with link=eliminar_url object="cliente" %}
                <!-- Button trigger modal -->
                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar" title="Eliminar">
                   <i class="bi bi-trash"></i>
                </button>
-
             </div>
-
          </div>
 
          <div class="row my-3">
-
             <h2 class="text-center">Programar visita/llamada</h2>
-
             <div class="text-center">
                {% with llamadas|first as llamada  %}
                   {% if llamadas.count != 0 and llamada.estado != "FINALIZADA"%}
@@ -83,21 +77,27 @@
                   <tbody>                     
                      {% for interaccion, tipo, visibilidad in interacciones_cliente%}
                         <tr >
-                           <td>{{interaccion.fecha}}</td>
+                           <td class="column">{{interaccion.fecha}}</td>
                            <td>{{interaccion.observaciones}}</td>
                            <td>{{tipo}}</td>
-                           <td>                           
+                           <td class="column rigth">                           
                               {% if interaccion.estado != "FINALIZADA"%}
                                  {% if tipo == "Visita" %}
+                                    {% url 'general_usage:subir-archivo' 'interaccion' interaccion.pk as link%}
                                     {% include 'modals/finalizar_visita.html' with pk=interaccion.pk %}
-                                    {% include 'modals/subir_archivos.html' with cliente=cliente.pk interaccion=interaccion.pk %}
+                                    {% include 'modals/subir_archivos.html' with link=link%}
                                     {% include 'modals/reprogramar_visita.html' with visita=interaccion.pk %}
+                                    {% include 'modals/crear_nota.html' with pk=interaccion.pk tipo='interaccion'%}
 
 
                                     <button title="Añadir archivos" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" data-bs-target="#modalSubirArchivos"{{visibilidad}}><i class="bi bi-file-earmark-plus"></i>
                                     </button>
 
                                     <button title="Reprogramar" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReprogramarVisita"><i class="bi bi-calendar4-range"></i></button>
+
+                                    <button title="Crear nota" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearNota" {{visibilidad}}>
+            <i class="bi bi-journal-plus"></i>
+            </button>
                                     <button title="Finalizar visita" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita"{{visibilidad}}><i class="bi bi-check-circle"></i></button>
                                  {% else %}
                                     <button title="No responde/No desea" onclick="location.href='{% url 'clientes:rechazo' cliente.pk interaccion.pk%}'" type="button" class="btn btn-danger" {{visibilidad}} >
@@ -107,15 +107,15 @@
                                     <button onclick="location.href='{% url 'clientes:finalizar-llamada' interaccion.pk %}'" type="button" class="btn btn-success" title="Acepto servicio" {{visibilidad}}>
                                        <i class="bi bi-telephone-inbound"></i>
                                     </button>
+                           
+                                    </button>
 
                                  {% endif %}
-                                 <button class="btn btn btn-info" title="Añadir nota" {{visibilidad}}><i class="bi bi-journal-plus"></i></button>
+
 
                               {% else %}
 
                               <!-- <a href="{% url 'clientes:editar-visita' interaccion.pk%}" class="btn btn-primary">Editar</a>-->                                                               {% endif %}
-                              <button onclick="location.href='{% url 'clientes:editar-visita' interaccion.pk %}'" title="Inspeccionar" class="btn btn-primary" {{visibilidad}}><i class="bi bi-search"></i></button>
-
                            </td>
                         </tr>
                      {% endfor %}
@@ -124,8 +124,6 @@
             {% endif %}
          </div>
       </div>
-
    </div>
 
 {% endblock content %}
-

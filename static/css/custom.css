@@ -8,6 +8,7 @@
    padding: 10px;
 }
 .table.sticky{
+   border-collapse: collapse;
    text-align: center;
    height: 650px;
    display: block;
@@ -21,13 +22,38 @@
    background-color: gray;
 }
 
-.table.sticky th{
-   width:450px;
+.table.sticky td{
+   width: 450px;
+   border-bottom: 1px solid #000;
 }
 
+.column{
+   border-left: 1px solid #000;
+}
+
+.column.rigth{
+   border-right: 1px solid #000;
+}
+
+
+.table.sticky th{
+   width: 450px;
+   border-left: 1px solid #000;
+
+}
+ .table.sticky th:first-child{
+   border-left: none;
+
+ }
 button:disabled {
    position: static !important;
 }
+
+.span{
+   width: 900px;
+
+}
+
 
 img.logo{
    padding-left: 10px;
@@ -36,7 +62,28 @@ img.logo{
 }
 
 
+table.form{
+   text-align: center;
+   border-collapse: collapse;
+}
 
+table.form th{
+   width: 250px;
+}
+
+table.form input{
+   margin: 0 auto;
+   width: 80px;
+
+}
+
+table.form select{
+   width: 200px;
+}
+
+*, *before, *after{
+   box-sizing: border-box;
+}
 
 
 

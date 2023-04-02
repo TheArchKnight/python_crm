@@ -1,12 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-   {% block titulo %} 
-      <h2 class="text-center">Todas las obras</h2>
-   {% endblock titulo %}
-
    {% include 'modals/eliminar_obra.html' %}
-
    <div class="row">
       <div class="col-md-12">
          <div class="table-responsive">
@@ -28,7 +23,7 @@
                <tbody>             
                   {% for obra, obra_url in obras %}
                      <tr class="text-center">
-                        <td><a href="{% url 'fachadas:detalles-obra' obra.pk año_mes dia %}">{{obra.nombre_obra}}</a> <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarObra" title="Eliminar"   onclick="setUrlModal('{{obra_url}}')"> <i class="bi bi-trash"></i></button>  </td>
+                        <td><a href="{% url 'fachadas:detalles-obra' obra.pk año_mes dia %}">{{obra.nombre_obra}}</a> <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarObra" title="Eliminar"   onclick="setUrlModal('{{obra_url}}', 'href')"> <i class="bi bi-trash"></i></button>  </td>
                         <td>{{obra.direccion}}</td>
                         <td>{{obra.fecha_inicio}}</td>
                         <td>{{obra.estado}}</td>

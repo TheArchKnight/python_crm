@@ -1,17 +1,20 @@
 from datetime import datetime
 import os
 from shutil import rmtree
+from django.http import response
 from django.shortcuts import redirect, render, reverse
-from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, TemplateView
 from clientes.models import Empleado
 from fachadas.models import *
 from fachadas.forms import *
 from fachadas.functions import *
+from fachadas.mixins import EmpleadoRequiredMixin
+from functions import create_folder, write_file
 # Create your views here.
 
 CARPETA_FACHADAS = "/home/anorak/Test/Fachadas/"
 
-class ObraListView(ListView):
+class ObraListView(EmpleadoRequiredMixin, ListView):
     template_name = "fachadas/lista_fachadas.html"
 
     def get_queryset(self):
@@ -30,7 +33,7 @@ class ObraListView(ListView):
             })
         return context
 
-class ObraCreateView(CreateView):
+class ObraCreateView(EmpleadoRequiredMixin, CreateView):
     template_name ="fachadas/iniciar_obra.html"
     form_class = ObraModelForm
 
@@ -47,10 +50,10 @@ class ObraCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.empelado = Empleado.objects.get(user=self.request.user)
-        os.mkdir(CARPETA_FACHADAS + form.instance.nombre_obra)
+        create_folder(CARPETA_FACHADAS + form.instance.nombre_obra)
         return super(ObraCreateView, self).form_valid(form)
 
-class ObraDetailView(DetailView):
+class ObraDetailView(EmpleadoRequiredMixin, DetailView):
     template_name = "fachadas/detalles_obra.html"
     pk_url_kwarg = "obra_pk"
     queryset = Obra.objects.all()
@@ -71,9 +74,10 @@ class ObraDetailView(DetailView):
         context = super(ObraDetailView, self).get_context_data(**kwargs)
         obra = self.get_object()
         trabajadores = Trabajador.objects.filter(obra = obra)
-        pagos = Pago.objects.filter(obra=obra, fecha=obra.fecha_ultimo_pago)
+        pagos =[]
         try:
-            pagos = [pagos.get(trabajador=i) for i in trabajadores] 
+            pagos = Pago.objects.filter(obra=obra)
+            pagos = [pagos.filter(trabajador=i).order_by("-fecha").first() for i in trabajadores] 
         except:
             pass
         trabajadores_pagos = zip(trabajadores, pagos)
@@ -105,7 +109,7 @@ class ObraDetailView(DetailView):
             })
         return context
 
-class ObraDeleteView(DeleteView):
+class ObraDeleteView(EmpleadoRequiredMixin, DeleteView):
     model = Obra
     http_method_names = ['delete']
 
@@ -126,20 +130,29 @@ def pagar_nomina(request, pk, año_mes, dia):
         inicio_nomina = request.POST["inicio_nomina"] 
         final_nomina = request.POST["final_nomina"]
         for trabajador in trabajadores:
-            acciones = Accion.objects.filter(trabajador=trabajador, fecha__gte=inicio_nomina, fecha__lte=final_nomina)
+            acciones = Accion.objects.filter(trabajador=trabajador, 
+                                             fecha__gte=inicio_nomina, 
+                                             fecha__lte=final_nomina)
             valor_nomina = sum([i.precio_unidad * i.cantidad for i in acciones])
             trabajador.acumulado -= valor_nomina
+            if trabajador.acumulado < 0:
+                trabajador.acumulado = 0
             obra.fecha_ultimo_pago = date.today() 
-            Pago.objects.create(fecha=date.today(), monto=valor_nomina, periodo_inicio=inicio_nomina, periodo_final=final_nomina, trabajador=trabajador, obra=obra)
+            Pago.objects.create(fecha=date.today(), 
+                                monto=valor_nomina, 
+                                periodo_inicio=inicio_nomina, 
+                                periodo_final=final_nomina, 
+                                trabajador=trabajador, 
+                                obra=obra)
             trabajador.save()
             obra.save()
 
     return redirect(reverse("fachadas:detalles-obra", args=[pk, año_mes, dia]))
 
-class CostoCreateView(FormView):
+class CostoCreateView(EmpleadoRequiredMixin, FormView):
     template_name = "fachadas/crear_costo.html"
     form_class=CostoForm
-    
+
     def get_success_url(self):
         dict = unir_fecha(self.kwargs)
         return reverse("fachadas:detalles-obra", args=[self.kwargs["pk"], dict["año_mes"], dict["dia"]])
@@ -166,7 +179,7 @@ class CostoCreateView(FormView):
         cobro_unidad = form.cleaned_data["cobro_unidad"]
         obra = Obra.objects.get(id=self.kwargs["pk"])
         trabajador = form.cleaned_data["trabajador"]
-        
+
         obra.costo_total += precio_unidad * cantidad
         obra.save()
 
@@ -179,7 +192,7 @@ class CostoCreateView(FormView):
 
         return super().form_valid(form)
 
-class TrabajadorCreateView(CreateView):
+class TrabajadorCreateView(EmpleadoRequiredMixin, CreateView):
     template_name="fachadas/crear_trabajador.html"
     form_class = TrabajadorModelForm
 
@@ -200,19 +213,49 @@ class TrabajadorCreateView(CreateView):
         form.instance.obra = obra
         return super().form_valid(form)
 
+class PagoListView(EmpleadoRequiredMixin, ListView):
+    template_name = 'fachadas/filtrar_pagos.html'
+    queryset = Pago.objects.all()
+    def get_context_data(self, **kwargs):
+        context = super(PagoListView, self).get_context_data(**kwargs)
+        inicio_pago = self.kwargs["inicio_pago"]
+        final_pago = self.kwargs["final_pago"]
+        obra = Obra.objects.get(id=self.kwargs["obra_pk"])
+        pagos = Pago.objects.filter(obra=obra, 
+                                    fecha__gte=inicio_pago, 
+                                    fecha__lte=final_pago)
+        urls = [reverse("fachadas:eliminar-pago", args=[self.kwargs["obra_pk"], inicio_pago,final_pago, i.id]) for i in pagos]
+        pagos = zip(pagos, urls)
+        # do something with your data
+        context.update({"pagos":pagos, 
+                        "obra":obra,
+                        "previous":reverse("fachadas:detalles-obra", kwargs={"obra_pk": self.kwargs["obra_pk"], 
+                                                                             "año_mes": date.today().strftime("%Y-%m"), 
+                                                                             "dia": date.today().strftime("%d")}),
+                        "inicio_pago":inicio_pago,
+                        "final_pago":final_pago
+                        })
+        #  set your context
+        return context
 
-def filtrar_pagos(request, obra_pk):
+class PagoDeleteView(EmpleadoRequiredMixin, DeleteView):
+    model = Pago
+    http_method_names = ['delete']
+
+    def dispatch(self, request, *args, **kwargs):
+        handler = getattr(self, 'delete')
+        return handler(request, *args, **kwargs)
+
+    def get_success_url(self):
+        success_url = str(reverse('fachadas:filtrar-pagos', args=[self.kwargs["obra_pk"], self.kwargs["inicio_pago"], self.kwargs["final_pago"]]))
+        return success_url
+
+def subir_archivo(request, obra_pk, año_mes, dia):
     obra = Obra.objects.get(id=obra_pk)
-    pagos = []
-    if request.method == "POST":
-        inicio_pago = request.POST["inicio_pago"] 
-        final_pago = request.POST["final_pago"]
-        periodo = inicio_pago + "/" + final_pago
-        pagos = Pago.objects.filter(obra=obra, periodo=periodo)
-        return redirect(reverse("fachadas:filtrar-pagos", args=[obra_pk]))
-    return render(request, "fachadas/filtrar_pagos.html", {
-           "pagos": pagos,
-           "obra": obra,
-           })
+    files = request.FILES.getlist("files")
+    path = f"{CARPETA_FACHADAS}{obra.nombre_obra}/{año_mes}/{dia}"
+    write_file(files, path)
+    return redirect(reverse("fachadas:detalles-obra", args=[obra_pk, año_mes, dia]))
+
 
 

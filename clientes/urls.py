@@ -11,9 +11,9 @@ urlpatterns = [
     path("<int:pk>/eliminar_visita/", VisitaDeleteView.as_view(), name="eliminar-visita"),
     path("<int:pk>/finalizar_visita/", finalizar_visita, name="finalizar-visita"),
     path("<int:cliente_pk>/<int:interaccion_pk>/rechazo/", rechazo_cliente, name="rechazo"),
-    path("busqueda/", search_clientes, name="search-clientes" ),
+#   path("busqueda/", search_clientes, name="search-clientes" ),
     path("<int:pk>/reprogramar/", reprogramar_visita, name="reprogramar-visita"),
-    path("<int:cliente_pk>/<int:interaccion_pk>/subir_archivo",subir_archivo, name="subir-archivo"),
+#    path("<int:cliente_pk>/<int:interaccion_pk>/subir_archivo",subir_archivo, name="subir-archivo"),
     path("<int:pk>/finalizar_llamada/", finalizar_llamada, name="finalizar-llamada")
 #    path('<int:pk>/visitas/', include('visitas.urls', namespace='visitas'))
 ]

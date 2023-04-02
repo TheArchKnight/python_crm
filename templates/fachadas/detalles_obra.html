@@ -2,9 +2,12 @@
 
 {% block content%}
 
+
+   {% url 'general_usage:subir-archivo' 'obra' obra.pk as link %}
+   {% include 'modals/subir_archivos.html' with link=link%}
    {% include 'modals/pagar_nomina.html' %}
    {% include 'modals/filtrar_pagos.html' %}
-
+   {% include 'modals/crear_nota.html' with pk=obra.pk tipo='obra'%}
    <div style="text-align: center;">
       <h1>{{obra.nombre_obra}}</h1>
       <h3>Costo total de la obra:{{obra.costo_total}}</h3>
@@ -19,71 +22,54 @@
 
    </div>
    <div class="row my-1">
-      <div class="col-md-4">
-
-
+      <div class="col-md-6">
          <h4 class="text-center">
             Trabajadores 
             <button title="Añadir trabajador"class="btn btn-primary" onclick="location.href='{% url 'fachadas:crear-trabajador' obra.pk dict_fecha.año_mes dict_fecha.dia %}'"><i class="bi bi-person-fill-add"></i>
             </button>
-
             <button title="Pagar nomina" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalPagarNomina">
                <i class="bi bi-currency-dollar"></i>
             </button>
-
+            <button class="btn btn-secondary" title="Filtrar pagos" data-bs-toggle="modal" data-bs-target="#modalFiltrarPagos">
+               <i class="bi bi-search"></i>
+            </button>
          </h4>
-         <table class="table sticky my-2" style="height: 50%;">
+         <table class="table sticky my-2" style="height: 530px;">
             <thead>
                <th>Nombre</th>
                <th>Cargo</th>
                <th>Acumulado</th>
-
-            </thead>
-            <tbody>
-               {% for trabajador in trabajadores  %}
-                  <tr>
-                     <td>{{trabajador.nombre}}</td>
-                     <td>{{trabajador.cargo}}</td>
-                     <td>{{trabajador.acumulado}}</td>
-                  </tr>
-               {% endfor %}
-            </tbody>
-
-         </table>
-         <h4 class="text-center">Ultimo pago
-            <button class="btn btn-secondary" title="Filtrar pagos" data-bs-toggle="modal" data-bs-target="#modalFiltrarPagos">
-               <i class="bi bi-search"></i>
-            </button>
-
-
-         </h4>
-         <table class="table sticky my-2" style="height: 50%;">
-
-            <thead>
-               <th>Nombre</th>
-               <th>Cargo</th>
-               <th>Periodo</th>
-               <th>Monto</th>
-
+               <th colspan="2" class="span">Ultimo Pago</th>
             </thead>
             <tbody>
                {% for trabajador, pago in trabajadores_pagos  %}
                   <tr>
-                     <td>{{trabajador.nombre}}</td>
-                     <td>{{trabajador.cargo}}</td>
-                     <td>{{pago.periodo}}</td>
-                     <td>{{pago.monto}}</td>
+                     <td class="column">{{trabajador.nombre}}</td>
+                     <td class="column">{{trabajador.cargo}}</td>
+                     <td class="column">{{trabajador.acumulado}}</td>
+                     <td class="column">{{pago.monto}}</td>
+                     <td class="column rigth">{{pago.fecha}}</td>
                   </tr>
                {% endfor %}
             </tbody>
 
          </table>
       </div>
-      <div class="col-md-8">
+      <div class="col-md-6">
          <h4 class="text-center">
-            Costos
+            {{dict_fecha.año_mes}}-{{dict_fecha.dia}}
             <button class="btn btn-primary" title="Añadir costo" onclick="location.href='{% url 'fachadas:crear-costo' obra.pk dict_fecha.año_mes dict_fecha.dia%}'"><i class="bi bi-clipboard2-plus"></i></button>
 
+
+            <button title="Añadir archivos" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" data-bs-target="#modalSubirArchivos">
+               <i class="bi bi-file-earmark-plus"></i>
+
+            </button>
+
+
+            <button title="Crear nota" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" data-bs-target="#modalCrearNota">
+<i class="bi bi-journal-plus"></i>
+            </button>
          </h4>
 
          <table class="table sticky my-2" style="height: 530px;" id="clientes-table">
@@ -104,12 +90,12 @@
                {% for costo in costos %}
                   <tr>
 
-                     <td>{{costo.cantidad}}</td>
-                     <td>{{costo.descripcion}}</td>
-                     <td>{{costo.fecha}}</td>
-                     <td>{{costo.trabajador}}</td>
-                     <td>{{costo.precio_unidad}}</td>
-                     <td>{{costo.cobro_unidad}}</td>
+                     <td class="column">{{costo.cantidad}}</td>
+                     <td class="column">{{costo.descripcion}}</td>
+                     <td class="column">{{costo.fecha}}</td>
+                     <td class="column">{{costo.trabajador}}</td>
+                     <td class="column">{{costo.precio_unidad}}</td>
+                     <td class="column rigth">{{costo.cobro_unidad}}</td>
                   </tr>
 
                {% endfor %}

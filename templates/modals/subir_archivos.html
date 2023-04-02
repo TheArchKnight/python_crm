@@ -7,20 +7,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body text-center">
-            {% with pk1=cliente pk2=interaccion%}
-               <form action="{% url 'clientes:subir-archivo' pk1 pk2 %}" method="post" enctype="multipart/form-data" name="subir" id="subir">
-                  {% csrf_token %}
-                  Seleccione los archivos que desea subir: <input type="file" name="files" multiple="multiple">
-               </form>
-
-
-            {% endwith %}
-
+            <form action="{{link}}" method="post" enctype="multipart/form-data" name="subir" id="subir">
+               {% csrf_token %}
+               Seleccione los archivos que desea subir: <input type="file" name="files" multiple="multiple">
+               <input type="date" name="fecha" value="{{dict_fecha.año_mes}}-{{dict_fecha.dia}}" hidden>
+            </form>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
 
-            <button type="submit" form="subir" class="btn btn-success">Reprogramar</button>
+            <button type="submit" form="subir" class="btn btn-success">Subir</button>
 
          </div>
       </div>

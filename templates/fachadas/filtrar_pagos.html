@@ -1,7 +1,36 @@
 {% extends 'base.html' %}
-
 {% block content %}
+   {% include 'modals/eliminar_pago.html' %}
 
-   {{pagos}}
+   <div class="text-center">
+      <h2>{{obra.nombre_obra}}</h2>
+      <h3>Ultimo pago: {{obra.fecha_ultimo_pago}}</h3>
+      <h5>Filtros de busqueda: {{inicio_pago}}/{{final_pago}}</h5>
+   </div>
+
+   <table class="table sticky">
+      <thead>
+         <th>Dia del pago</th>
+         <th>Periodo</th>
+         <th>Trabajador</th>
+         <th>Monto</th>
+      </thead>
+      <tbody>
+
+         {% for pago, pago_url in pagos %}
+            <tr>
+               <td>
+                  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalEliminarPago" title="Eliminar" onclick="setUrlModal('{{pago_url}}', 'action')"> <i class="bi bi-trash"></i></button>
+                  {{pago.fecha}}</td>
+               <td>{{pago.periodo_inicio|date:"Y-m-d"}}/{{pago.periodo_final|date:"Y-m-d"}}</td>
+               <td>{{pago.trabajador}}</td>
+               <td>{{pago.monto}}</td>
+            </tr>
+         {% endfor %}
+
+      </tbody>
+
+
+   </table>
 
 {% endblock content %}

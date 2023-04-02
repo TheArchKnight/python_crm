@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-   {% block titulo %} 
-      <h2 class="text-center">Todos los clientes</h2>
-   {% endblock titulo %}
    <div class="row">
       <div class="col-md-12">
          <div class="table-responsive">
@@ -11,29 +8,34 @@
                <thead>               
                      <th class="text-center" col-index=1>Nombre</th>
                      <th class="text-center" col-index=2>Direccion</th>
-                     <th class="text-center" col-index=3>Correo</th>
-                     <th class="text-center" col-index=4>Frecuencia
+                     <th class="text-center" col-index=3>Administrador</th>
+                     <th class="text-center" col-index=4>Telefono</th>
+
+                     <th class="text-center" col-index=5>Correo</th>
+                     <th class="text-center" col-index=6>Frecuencia
                         <select  class="table-filter form-select text-center"   onchange="filter_rows()">
                            <option value="all">Todos</option>
                         </select>
                      </th>
-                     <th class="text-center" col-index=5>Fecha de vencimiento
+                     <th class="text-center" col-index=7>Fecha de vencimiento
                         <select class="table-filter form-select text-center" onchange="filter_rows()">
                            <option value="all">Todos</option>
                         </select>
                      </th>
-                     <th class="text-center" col-index=6>Estado
+                     <th class="text-center" col-index=8>Estado
                         <select class="table-filter form-select text-center" onchange="filter_rows()">
                            <option value="all">Todos</option>
                         </select>
                      </th>
-                     <th class="text-center"></th>
+                     <th class="text-center">Empleado a cargo</th>
                </thead>
                <tbody>             
                   {% for cliente in clientes %}
                      <tr class="text-center">
                         <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
                         <td>{{cliente.direccion}}</td>
+                        <td>{{cliente.administrador}}</td>
+                        <td>{{cliente.telefono}}</td>
                         <td>{{cliente.correo}}</td>
                         <td>{{cliente.frecuencia_meses}}</td>
                         {% if cliente.fecha_vencimiento == None %}
@@ -42,7 +44,7 @@
                            <td>{{cliente.fecha_vencimiento}}</td>
                         {% endif %}
                         <td>{{cliente.estado}}</td>
-                        <td> <a href="{% url 'clientes:detalles-cliente' cliente.pk %}" class="btn btn-primary align-self-lg-center" role="button">Detalles</a> </td>
+                        <td>{{cliente.empleado}} </td>
                      </tr>
                   {% endfor %}
                </tbody>
