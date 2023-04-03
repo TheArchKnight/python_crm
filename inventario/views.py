@@ -1,6 +1,7 @@
 
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
+from general_usage.models import Grupo_Pedido
 
 from inventario.models import *
 from inventario.forms import *
@@ -9,8 +10,14 @@ class ElementoListView(ListView):
     template_name="inventario/lista_elementos.html"
     queryset = Elemento.objects.all().order_by("-codigo_general")
     object_list = Elemento.objects.all() 
-
     context_object_name = "elementos"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        pedidos = Grupo_Pedido.objects.filter(estado="EN PROCESO")
+        context.update({"pedidos":pedidos})
+        return context
+
     def post(self, request, **kwargs):
         searched = request.POST["searched"]
         filtro = request.POST["filtro"]

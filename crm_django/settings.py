@@ -175,10 +175,10 @@ CELERY_BEAT_SCHEDULE = { # scheduler configuration
     #}
     "garantias" : {
         "task" : "clientes.tasks.llamadas",
-        "schedule" : crontab('0', '7', '1-6')
+        "schedule" : crontab('21', '16', '0-6')
         },
     "visitas": {
         "task" : "clientes.tasks.visitas",
-        "schedule" : crontab('0', '7', '1-6') 
+        "schedule" : crontab('40', '15', '0-6') 
         }
 }

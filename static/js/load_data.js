@@ -59,11 +59,6 @@ function agregar_inputs(){
 
       var nuevaCelda = nuevaFila.insertCell(i);
       nuevaCelda.appendChild(nuevo_input)
-      
-   
-//      document.querySelector('#pedidoForm').appendChild(nuevo_label)
-//      document.querySelector('#pedidoForm').appendChild(nuevo_input)
-
    }
    var id_elemento = "id_form-"+cantidad_forms.value+"-elemento";
    var id_subelemento = "id_form-"+cantidad_forms.value+"-subelemento";
@@ -73,8 +68,23 @@ function agregar_inputs(){
    });
 
    cantidad_forms.value = parseInt(cantidad_forms.value)+1;
+   if(parseInt(cantidad_forms.value) > 1){
+      boton = document.getElementById("eliminar-input")
+      boton.removeAttribute('disabled');
+   }
 }
 
+function eliminar_inputs(){
+   var cantidad_forms = document.querySelector("#id_form-TOTAL_FORMS");
+   var table = document.getElementById("formset");
+   var rowCount = table.rows.length;
+   table.deleteRow(rowCount -1);
+   cantidad_forms.value = parseInt(cantidad_forms.value-1)
+   if(parseInt(cantidad_forms.value) < 2){
+      boton = document.getElementById("eliminar-input")
+      boton.setAttribute('disabled','');
+   }
+}
 
 var id_elemento = "id_form-"+0+"-elemento";
 var id_subelemento = "id_form-"+0+"-subelemento";
@@ -83,3 +93,8 @@ ajax_data(id_subelemento, id_elemento)
 selectElement.addEventListener('change', (event) => {
    ajax_data(id_subelemento, id_elemento)
 });
+
+boton = document.getElementById("eliminar-input")
+
+boton.setAttribute('disabled', '');
+

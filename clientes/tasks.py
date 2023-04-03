@@ -34,8 +34,7 @@ def llamadas():
             body_email += f"¡Hola {empleado.user.username}!\n"
             body_email += f"El dia de hoy, {len(llamadas)} llamadas deben de ser realizadas. Puedes visualizar mas a detalles en el CRM.\n\n"
             for llamada in llamadas:
-                visita = Visita.objects.filter(cliente = llamada.cliente).first() 
-                body_email += f"Nombre: {llamada.cliente.nombre_orgnanizacion}\nDireccion: {llamada.cliente.direccion}\nFrecuencia de visitas (meses): {llamada.cliente.frecuencia_meses}\nUltima visita: {visita.fecha}\nMotivo de la llamada: {llamada.observaciones}\n\n"
+                body_email += f"Nombre: {llamada.cliente.nombre_orgnanizacion}\nDireccion: {llamada.cliente.direccion}\nFrecuencia de visitas (meses): {llamada.cliente.frecuencia_meses}\nMotivo de la llamada: {llamada.observaciones}\n\n"
             send_mail(f"Llamadas clientes {fecha_string}", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
 
 

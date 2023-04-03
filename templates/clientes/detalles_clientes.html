@@ -97,7 +97,13 @@
 
                                     <button title="Crear nota" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearNota" {{visibilidad}}>
             <i class="bi bi-journal-plus"></i>
-            </button>
+                                    </button>
+                                    
+                                    <button title="Realizar pedido" class="btn btn-info" onclick="location.href='{% url 'general_usage:crear-pedido' 'visita' interaccion.fecha interaccion.pk %}'">
+                                       <i class="bi bi-box-seam"></i>
+                                    </button>
+
+
                                     <button title="Finalizar visita" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita"{{visibilidad}}><i class="bi bi-check-circle"></i></button>
                                  {% else %}
                                     <button title="No responde/No desea" onclick="location.href='{% url 'clientes:rechazo' cliente.pk interaccion.pk%}'" type="button" class="btn btn-danger" {{visibilidad}} >

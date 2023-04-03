@@ -11,7 +11,7 @@ def write_file(files, path, model, user):
             Archivo.objects.create(ubicacion=model, nombre=f.name, usuario=user)
     except FileNotFoundError:
         create_folder(path)
-        write_file(files, path)
+        write_file(files, path, model,user)
         
 def create_folder(full_path):
     list_path = full_path.split("/")
@@ -23,6 +23,24 @@ def create_folder(full_path):
                 os.mkdir(path)
             except FileExistsError:
                 continue
+
+def filter_models(models, queryset):
+    #Two arrays need to be passed, one with the model Classes to search and replace 
+    #on the queryset. The queryset needs to be ordered
+    lista_queryset = []
+    for i in queryset:
+        for j in models:
+            try:
+                elemento = j.objects.get(id=i.id)
+                dict_queryset = {"elemento":elemento, "tipo":type(elemento).__name__}
+                lista_queryset.append(dict_queryset)
+                break
+            except:
+                continue
+    return lista_queryset
+
+
+
 
 
 

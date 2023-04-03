@@ -117,10 +117,11 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         visitas = Visita.objects.filter(cliente_id=self.kwargs["pk"]).order_by("-fecha")
         fecha = form.cleaned_data["fecha"]
         observaciones = form.cleaned_data["observaciones"]
+        empleado = Empleado.objects.get(user=self.request.user)
     #our form is a generic one which can be used for creating multiple subclasses of the interaction parent class
         if form.cleaned_data["tipo"] == "VISITA":
             carpeta = fecha.strftime('%Y-%m-%d')
-            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
+            Visita.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente, empleado=empleado)
             if visitas.count() == 0:
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
@@ -132,7 +133,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
             cliente.save()
 
         elif form.cleaned_data["tipo"] == "LLAMADA":
-            Llamada.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente)
+            Llamada.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente, empleado=empleado)
    
 
         return super().form_valid(form)

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   <ul>
+   {% for objeto in objetos  %}
+      <li>{{objeto.tipo}}-{{objeto.elemento}}</li>
+
+
+   {% endfor %}
+
+   </ul>
+
+{% endblock content %}
