@@ -1,4 +1,3 @@
-from django.forms import formset_factory
 from django.http import HttpResponseRedirect, JsonResponse
 from django.http.response import json
 from django.shortcuts import redirect, render
@@ -30,7 +29,9 @@ class NotaCreateView(View):
             link = reverse("fachadas:detalles-obra", args=[pk, año_mes, dia])
         elif ubicacion == "interaccion":
             ubicacion = Interaccion.objects.get(id=pk)
-            link = reverse("clientes:detalles-cliente", args=[pk])
+            print(pk)
+            print("Interaccion")
+            link = reverse("clientes:detalles-cliente", args=[ubicacion.cliente.id])
 
         Nota.objects.create(ubicacion=ubicacion, contenido=contenido, usuario=request.user)
         return redirect(link)
@@ -54,11 +55,11 @@ class ArchivoCreateView(View):
             link = reverse("fachadas:detalles-obra", args=[pk, año_mes, dia])
             path = f"{CARPETA_FACHADAS}{ubicacion.nombre_obra}/{año_mes}/{dia}"
         elif ubicacion == "interaccion":
-            ubicacion = Visita.objects.get(id=pk)
+            ubicacion = Interaccion.objects.get(id=pk)
             cliente = ubicacion.cliente
             link = reverse("clientes:detalles-cliente", args=[cliente.id])
             path = f"{CARPETA_FUMIGACION}/{cliente.nombre_orgnanizacion}/{ubicacion.fecha}"
-        write_file(files, path, ubicacion, request.user)
+        write_file(files, path, request.user, ubicacion)
         return(redirect(link))
 
 
@@ -80,13 +81,13 @@ class PedidoFormsetView(CreateView):
             fecha = datetime.strptime(self.kwargs["fecha"], "%Y-%m-%d").date()
             año_mes = fecha.strftime("%Y-%m")
             dia = fecha.strftime("%d")
-            link = reverse("fachadas:detalles-obra", kwargs={"obra_pk":
-                                                             self.kwargs["pk"],
+            link = reverse("fachadas:detalles-obra", kwargs={"obra_pk":self.kwargs["pk"],
                                                              "año_mes":año_mes,
                                                              "dia":dia
                                                              })
         elif self.kwargs["tipo"] == "visita":
-            link = reverse("clientes:detalles-cliente", args=[self.kwargs["pk"]])
+            visita = Visita.objects.get(interaccion_ptr_id=self.kwargs["pk"])
+            link = reverse("clientes:detalles-cliente", args=[visita.cliente.id])
         return link
 
     def post(self, request, *args, **kwargs):
@@ -144,7 +145,6 @@ class PedidoDetailView(DetailView):
         grupo_pedido = self.get_object()
         elementos_pedido =  Pedido.objects.filter(grupo_pedido=grupo_pedido)
         forms = request.POST
-        print(forms)
         for i in range(len(elementos_pedido)):
             elementos_pedido[i].cantidad_enviada = int(forms["form-"+str(i)+"-cantidad_enviada"])
             elementos_pedido[i].estado = "DESPACHADO" 
@@ -159,18 +159,40 @@ class ObjetoListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ubicacion = self.kwargs["tipo"]
+        modelo = ""
         if ubicacion == "obra":
+            modelo = Obra.objects.get(id=self.kwargs["pk"])
             ubicacion = ContentType.objects.get_for_model(Obra)
-        elif ubicacion == "visita":
-            ubicacion = ContentType.objects.get_for_model(Visita)
-        objetos = Objeto.objects.filter(content_type__pk=ubicacion.id).order_by("-fecha")
+        elif ubicacion == "interaccion":
+            ubicacion = ContentType.objects.get_for_model(Interaccion)
+            interaccion = Interaccion.objects.get(id=self.kwargs["pk"])
+            modelo = interaccion.cliente
+        objetos = Objeto.objects.filter(content_type__pk=ubicacion.id, object_id=self.kwargs["pk"]).order_by("-fecha")
         list_models = [Archivo,Nota,Grupo_Pedido]
         objetos = filter_models(list_models, objetos)
-        
         context.update({
             "objetos": objetos,
+            "previous": self.get_success_url(),
+            "fecha": self.kwargs["fecha"],
+            "modelo": modelo
             })
         return context
 
+
+    def get_success_url(self):
+        link = ''
+        if self.kwargs["tipo"] == "obra":
+            fecha = datetime.strptime(self.kwargs["fecha"], "%Y-%m-%d").date()
+            año_mes = fecha.strftime("%Y-%m")
+            dia = fecha.strftime("%d")
+            link = reverse("fachadas:detalles-obra", kwargs={"obra_pk":
+                                                             self.kwargs["pk"],
+                                                             "año_mes":año_mes,
+                                                             "dia":dia
+                                                             })
+        elif self.kwargs["tipo"] == "interaccion":
+            visita = Interaccion.objects.get(id=self.kwargs["pk"])
+            link = reverse("clientes:detalles-cliente", args=[visita.cliente.id])
+        return link
 
 

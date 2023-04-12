@@ -21,4 +21,10 @@ function setUrlPagos(pk){
    window.location = url
 }
 
+function setUrlModal1(url, attr, idAttr){
+   const link = document.getElementById(idAttr); 
+   console.log(attr)
+   link.setAttribute(attr, url)
+}
+
 

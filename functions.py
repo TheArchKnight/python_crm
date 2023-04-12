@@ -2,16 +2,19 @@ import os
 
 from general_usage.models import Archivo
 
-def write_file(files, path, model, user):
+def write_file(files, path, user,model=None):
+    file = None
     try:
         for f in files:
             with open(f"{path}/{f.name}", "wb+") as destination:
                 for chunk in f.chunks():
                     destination.write(chunk)
-            Archivo.objects.create(ubicacion=model, nombre=f.name, usuario=user)
+            file = Archivo.objects.create(ubicacion=model, nombre=f.name, usuario=user)      
     except FileNotFoundError:
         create_folder(path)
-        write_file(files, path, model,user)
+        file = write_file(files, path, user,model)
+    return file
+
         
 def create_folder(full_path):
     list_path = full_path.split("/")

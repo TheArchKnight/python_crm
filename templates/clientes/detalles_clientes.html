@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-
+   {% include 'modals/subir_archivos.html'%}
+   {% include 'modals/crear_nota.html' %}
+   {% include 'modals/reprogramar_visita.html' %}
+   {% include 'modals/finalizar_visita.html' %}
    <div class="row">
       <div class="col-md-3 info-parent"> 
          <div class="row text-center info-cliente" >
@@ -76,35 +79,24 @@
 
                   <tbody>                     
                      {% for interaccion, tipo, visibilidad in interacciones_cliente%}
-                        <tr >
-                           <td class="column">{{interaccion.fecha}}</td>
+                        <tr>
+                           <td class="column"><a href="{% url 'general_usage:lista-objetos' 'interaccion' interaccion.fecha interaccion.pk %}">{{interaccion.fecha}}</a></td>
+
                            <td>{{interaccion.observaciones}}</td>
                            <td>{{tipo}}</td>
                            <td class="column rigth">                           
                               {% if interaccion.estado != "FINALIZADA"%}
+
+                                 <button title="Crear nota" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearNota" onclick="setUrlModal1('{% url 'general_usage:crear-nota' 'interaccion' interaccion.pk %}', 'action', 'nota')" {{visibilidad}}><i class="bi bi-journal-plus"></i>
+                                 </button>
+                                 <button title="Añadir archivos" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" onclick="setUrlModal1('{% url 'general_usage:subir-archivo' 'interaccion' interaccion.pk%}', 'action', 'subir')"data-bs-target="#modalSubirArchivos"{{visibilidad}}><i class="bi bi-file-earmark-plus"></i>
+                                 </button>
+
                                  {% if tipo == "Visita" %}
-                                    {% url 'general_usage:subir-archivo' 'interaccion' interaccion.pk as link%}
-                                    {% include 'modals/finalizar_visita.html' with pk=interaccion.pk %}
-                                    {% include 'modals/subir_archivos.html' with link=link%}
-                                    {% include 'modals/reprogramar_visita.html' with visita=interaccion.pk %}
-                                    {% include 'modals/crear_nota.html' with pk=interaccion.pk tipo='interaccion'%}
 
+                                    <button title="Reprogramar" type="button" class="btn btn-warning" data-bs-toggle="modal" onclick="setUrlModal1('{% url 'clientes:reprogramar-visita' interaccion.pk %}', 'action', 'reprogramar')"  data-bs-target="#modalReprogramarVisita"><i class="bi bi-calendar4-range"></i></button>
 
-                                    <button title="Añadir archivos" type="button" class="btn btn-disabled btn-secondary" data-bs-toggle="modal" data-bs-target="#modalSubirArchivos"{{visibilidad}}><i class="bi bi-file-earmark-plus"></i>
-                                    </button>
-
-                                    <button title="Reprogramar" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReprogramarVisita"><i class="bi bi-calendar4-range"></i></button>
-
-                                    <button title="Crear nota" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearNota" {{visibilidad}}>
-            <i class="bi bi-journal-plus"></i>
-                                    </button>
-                                    
-                                    <button title="Realizar pedido" class="btn btn-info" onclick="location.href='{% url 'general_usage:crear-pedido' 'visita' interaccion.fecha interaccion.pk %}'">
-                                       <i class="bi bi-box-seam"></i>
-                                    </button>
-
-
-                                    <button title="Finalizar visita" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita"{{visibilidad}}><i class="bi bi-check-circle"></i></button>
+                                    <button title="Finalizar visita" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalFinalizarVisita" onclick="setUrlModal1('{% url 'clientes:finalizar-visita' interaccion.pk %}', 'href', 'link-finalizar')"  {{visibilidad}}><i class="bi bi-check-circle"></i></button>
                                  {% else %}
                                     <button title="No responde/No desea" onclick="location.href='{% url 'clientes:rechazo' cliente.pk interaccion.pk%}'" type="button" class="btn btn-danger" {{visibilidad}} >
                                        <i class="bi bi-telephone-x"></i>
@@ -113,7 +105,7 @@
                                     <button onclick="location.href='{% url 'clientes:finalizar-llamada' interaccion.pk %}'" type="button" class="btn btn-success" title="Acepto servicio" {{visibilidad}}>
                                        <i class="bi bi-telephone-inbound"></i>
                                     </button>
-                           
+
                                     </button>
 
                                  {% endif %}

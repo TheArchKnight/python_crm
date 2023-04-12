@@ -9,10 +9,11 @@ from django.contrib.auth.models import AbstractUser
 #is stablished by a forgein key from an instance of the diferent kind of users
 #to this class
 class User(AbstractUser):
-    is_organisor = models.BooleanField(default=True)
+    is_organisor = models.BooleanField(default=False)
     fumigacion = models.BooleanField(default=False)
     inventario = models.BooleanField(default=False)
     fachadas = models.BooleanField(default=False)
+    mensajes = models.BooleanField(default=False)
     email = models.EmailField(null=False)
 
 #Users can belong to diferent profiles. For example, working on diferent 
@@ -36,6 +37,9 @@ class Cliente(models.Model):
     empleado = models.ForeignKey("Empleado", on_delete=models.SET_NULL, null=True)
     fecha_vencimiento = models.DateField(null=True, default=None)
     administrador = models.CharField(max_length=30)
+    supervisor = models.CharField(max_length=30)
+    telefono_supervisor = models.CharField(max_length=15)
+    correo_supervisor = models.EmailField()
     telefono = models.CharField(max_length=10)
     estado = models.CharField(max_length=10, choices = CHOICES_ESTADO)
     rechazos = models.IntegerField(default=0, null=False)

@@ -10,11 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
 import environ
 from pathlib import Path
 
-from django.conf.global_settings import EMAIL_BACKEND, EMAIL_HOST, EMAIL_HOST_PASSWORD, EMAIL_HOST_USER, EMAIL_PORT, EMAIL_USE_TLS, LOGIN_REDIRECT_URL, LOGIN_URL, LOGOUT_REDIRECT_URL
+#from django.conf.global_settings import EMAIL_BACKEND, EMAIL_HOST, EMAIL_HOST_PASSWORD, EMAIL_HOST_USER, EMAIL_PORT, EMAIL_USE_TLS, LOGIN_REDIRECT_URL, LOGIN_URL, LOGOUT_REDIRECT_URL
 
 from celery.schedules import crontab
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,47 +40,49 @@ ALLOWED_HOSTS = tuple(env.list('ALLOWED_HOSTS', default=[]))
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "django_extensions",
-    "clientes",
-    "empleados",
-    "inventario",
-    "fachadas",
-    "general_usage"
-]
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "django_extensions",
+        "django_celery_beat",
+        "clientes",
+        "empleados",
+        "inventario",
+        "fachadas",
+        "general_usage",
+        "mensajes_masivos"
+        ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-]
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        ]
 
 ROOT_URLCONF = "crm_django.urls"
 
 TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
+        {
+            "BACKEND": "django.template.backends.django.DjangoTemplates",
+            "DIRS": [BASE_DIR / "templates"],
+            "APP_DIRS": True,
+            "OPTIONS": {
+                "context_processors": [
+                    "django.template.context_processors.debug",
+                    "django.template.context_processors.request",
+                    "django.contrib.auth.context_processors.auth",
+                    "django.contrib.messages.context_processors.messages",
+                    ],
+                },
+            },
+        ]
 
 WSGI_APPLICATION = "crm_django.wsgi.application"
 
@@ -90,38 +91,38 @@ WSGI_APPLICATION = "crm_django.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST':env('DB_HOST'),
-        'PORT':env('DB_PORT'),
-    }
-}
+        "default": {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST':env('DB_HOST'),
+            'PORT':env('DB_PORT'),
+            }
+        }
 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-     #   "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-     "NAME": "crm_django.validators.CustomAttributeSimilarityValidator"
-    },
-    {
-    #    "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    "NAME" : "crm_django.validators.CustomMinimumLengthValidator"
-    },
-    {
-#        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    "NAME": "crm_django.validators.CustomCommonPasswordValidator"
-    },
-    {
-#        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    "NAME" : "crm_django.validators.CustomNumericPasswordValidator"
-    },
-]
+        {
+            #   "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+            "NAME": "crm_django.validators.CustomAttributeSimilarityValidator"
+            },
+        {
+            #    "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+            "NAME" : "crm_django.validators.CustomMinimumLengthValidator"
+            },
+        {
+            #        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+            "NAME": "crm_django.validators.CustomCommonPasswordValidator"
+            },
+        {
+            #        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+            "NAME" : "crm_django.validators.CustomNumericPasswordValidator"
+            },
+        ]
 
 
 # Internationalization
@@ -142,7 +143,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
         BASE_DIR/"static"
-    
+
         ]
 STATIC_ROOT="static_root"
 
@@ -164,21 +165,36 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
+#CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+CELERY_RESULT_BACKEND = f"db+mysql://{env('DB_USER')}:{env('DB_PASSWORD')}@{env('DB_HOST')}/{env('DB_NAME')}?charset=utf8mb4"
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
 CELERY_TIMEZONE = "America/Bogota"
 
 CELERY_BEAT_SCHEDULE = { # scheduler configuration 
-   # "send_notifications" : {
-    #    "task" : "clientes.tasks.send_notifications",
-     #   "schedule" : crontab('0', '7', '1-5'),
+                        # "send_notifications" : {
+                            #    "task" : "clientes.tasks.send_notifications",
+                            #   "schedule" : crontab('0', '7', '1-5'),
 
-    #}
-    "garantias" : {
-        "task" : "clientes.tasks.llamadas",
-        "schedule" : crontab('21', '16', '0-6')
-        },
-    "visitas": {
-        "task" : "clientes.tasks.visitas",
-        "schedule" : crontab('40', '15', '0-6') 
-        }
-}
+                            #}
+                        "garantias" : {
+                            "task" : "clientes.tasks.llamadas",
+                            "schedule" : crontab('0', '7', '1-5'),
+
+                            },
+                        "visitas": {
+                            "task" : "clientes.tasks.visitas",
+                            "schedule" : crontab('0', '7', '1-5'),
+
+                            }
+                        }
+
+
+
+
+
+

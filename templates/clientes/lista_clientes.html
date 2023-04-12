@@ -8,10 +8,10 @@
                <thead>               
                      <th class="text-center" col-index=1>Nombre</th>
                      <th class="text-center" col-index=2>Direccion</th>
-                     <th class="text-center" col-index=3>Administrador</th>
-                     <th class="text-center" col-index=4>Telefono</th>
+                     <th class="text-center" col-index=3>Supervisor</th>
+                     <th class="text-center" col-index=4>Telefono supervisor</th>
 
-                     <th class="text-center" col-index=5>Correo</th>
+                     <th class="text-center" col-index=5>Correo supervisor</th>
                      <th class="text-center" col-index=6>Frecuencia
                         <select  class="table-filter form-select text-center"   onchange="filter_rows()">
                            <option value="all">Todos</option>
@@ -27,16 +27,16 @@
                            <option value="all">Todos</option>
                         </select>
                      </th>
-                     <th class="text-center">Empleado a cargo</th>
+                     <th class="text-center">NIT</th>
                </thead>
                <tbody>             
                   {% for cliente in clientes %}
                      <tr class="text-center">
                         <td><a href="{% url 'clientes:detalles-cliente' cliente.pk %}">{{cliente.nombre_orgnanizacion}}</a></td>
                         <td>{{cliente.direccion}}</td>
-                        <td>{{cliente.administrador}}</td>
-                        <td>{{cliente.telefono}}</td>
-                        <td>{{cliente.correo}}</td>
+                        <td>{{cliente.supervisor}}</td>
+                        <td>{{cliente.telefono_supervisor}}</td>
+                        <td>{{cliente.correo_supervisor}}</td>
                         <td>{{cliente.frecuencia_meses}}</td>
                         {% if cliente.fecha_vencimiento == None %}
                            <td>----</td>
@@ -44,7 +44,7 @@
                            <td>{{cliente.fecha_vencimiento}}</td>
                         {% endif %}
                         <td>{{cliente.estado}}</td>
-                        <td>{{cliente.empleado}} </td>
+                        <td>{{cliente.nit}} </td>
                      </tr>
                   {% endfor %}
                </tbody>

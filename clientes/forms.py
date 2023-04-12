@@ -17,16 +17,17 @@ class InteraccionForm(forms.Form):
         super(InteraccionForm, self).__init__( *args, **kwargs)
         dict = {"class": "form-control", "type": "date"} 
         
-        condicion = False
-        try:
-            condicion =ultima_visita.fecha < date.today()
-        except:
-            pass
+       # condicion = False
+       # try:
+       #     condicion =ultima_visita.fecha < date.today()
+       # except:
+       #     pass
 
-        if condicion or ultima_visita == None:
-            dict["min"] = datetime.today().strftime("%Y-%m-%d")
-        else:
-            dict["min"] = (ultima_visita.fecha + timedelta(days=1)).strftime("%Y-%m-%d")
+       # if condicion or ultima_visita == None:
+       # else:
+        #    dict["min"] = (ultima_visita.fecha + timedelta(days=1)).strftime("%Y-%m-%d")
+        dict["min"] = datetime.today().strftime("%Y-%m-%d")
+
         self.fields["fecha"] = forms.DateField(widget = forms.DateInput(attrs= dict)) 
 
 
@@ -40,6 +41,9 @@ class ClienteModelForm(forms.ModelForm):
                 "administrador",
                 'telefono',
                 'correo',
+                'supervisor',
+                'telefono_supervisor',
+                'correo_supervisor',
                 'frecuencia_meses',
                 "estado"
                 )
@@ -51,7 +55,12 @@ class ClienteModelForm(forms.ModelForm):
                 'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
                 "administrador":forms.TextInput(attrs={"class":'form-control'}),
                 "telefono":forms.NumberInput(attrs={"class":'form-control'}),
-                "estado": forms.Select(attrs={"class":"form-control"})
+                "estado": forms.Select(attrs={"class":"form-control"}),
+                "supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                "telefono_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                "correo_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+
+
                 }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", 0)
@@ -98,10 +107,10 @@ class CustomUserCreationForm(UserCreationForm):
  
     class Meta:
         model = User
-        fields=("username", "fumigacion", "fachadas", "inventario", "email")
+        fields=("username", "fumigacion", "mensajes", "email")
         field_classes = {"username": CustomUserNameField}
         labels = {
-                "fumigacion": "Fumigacion",
+                "fumigacion": "Clientes",
                 "fachadas": "Fachadas",
                 "inventario": "Inventario",
                 "username": "Nombre de usuario"

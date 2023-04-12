@@ -13,6 +13,6 @@ urlpatterns = [
     path("<int:pk>/<str:año_mes>/<str:dia>/pagar_nomina", pagar_nomina, name="pagar-nomina"),
     path("<int:obra_pk>/<str:inicio_pago>/<str:final_pago>/pagos/", PagoListView.as_view(), name="filtrar-pagos"),
     path("<int:obra_pk>/<str:inicio_pago>/<str:final_pago>/eliminar-pago/<int:pk>/", PagoDeleteView.as_view(), name="eliminar-pago"),
-    path("<int:obra_pk>/<str:año_mes>/<str:dia>/subir-archivo", subir_archivo, name="subir-archivo"),
+#    path("<int:obra_pk>/<str:año_mes>/<str:dia>/subir-archivo", subir_archivo, name="subir-archivo"),
 
     ]

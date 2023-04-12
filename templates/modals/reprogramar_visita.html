@@ -7,12 +7,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body text-center">
-            {% with pk1=visita %}
-               <form action="{% url 'clientes:reprogramar-visita' pk1 %}" method="post" name="reprogramar" id="reprogramar">
-                  {% csrf_token %}
-                  Ingrese la nueva fecha: <input data-provide="datepicker" class="datepicker"  name="nueva_fecha" size="8">       
-               </form>
-            {% endwith %}
+            <form  method="post" name="reprogramar" id="reprogramar">
+               {% csrf_token %}
+               Ingrese la nueva fecha: <input data-provide="datepicker" class="datepicker"  name="nueva_fecha" size="8">       
+            </form>
             <div id="fecha_repetida"></div>
          </div>
          <div class="modal-footer">

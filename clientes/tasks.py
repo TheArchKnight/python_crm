@@ -11,14 +11,12 @@ def visitas():
         fecha = date.today()
         fecha_string = date.today().strftime("%Y-%m-%d")
         visitas = Visita.objects.filter(empleado=empleado, fecha=fecha)
-        print(visitas)
         body_email = ''
         if len(visitas) > 0:
             body_email += f"Hola {empleado.user.username}\n"
             body_email += f"El dia de hoy, {len(visitas)} tienen una visita programada. Puedes visualizar mas a detalles en el CRM.\n\n"
             for visita in visitas:
                 body_email += f"Nombre: {visita.cliente.nombre_orgnanizacion}\nDireccion: {visita.cliente.direccion}\nFrecuencia de visitas (meses): {visita.cliente.frecuencia_meses}\nObservaciones: {visita.observaciones}\n\n"
-            print(body_email)
             send_mail(f"Visitas de fumigacion {fecha_string}", body_email, "settings.EMAIL_HOST_USER", [empleado.user.email], fail_silently=False)
 
 

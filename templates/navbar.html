@@ -3,11 +3,12 @@
 {% url 'clientes:lista-cliente' as lista_url %}
 {% url 'fachadas:lista-obra' as fachadas_url %}
 {% url 'inventario:lista-elementos' as inventario_url %}
+{% url 'mensajes_masivos:lista-mensajes' as mensajes_url%}
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-bs-theme="dark">
    <div class="container-fluid">
       {% comment "show the back button only no necessary pages." %}{% endcomment %}
-      {% if request.path != landing_url and request.path != lista_url and request.path != fachadas_url and request.path != inventario_url%}
+      {% if request.path != landing_url and request.path != lista_url and request.path != fachadas_url and request.path != inventario_url and request.path != mensajes_url %}
          <button onclick="location.href='{{previous}}'" class="btn btn-secondary" title="Volver a la pagina previa"><i class="bi bi-arrow-left-square"></i></button>
       {% endif %}
 
@@ -33,6 +34,11 @@
             {% if request.user.is_organisor %}
                <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
             {% endif %}
+
+            {% if request.user.mensajes %}
+               <a href="{{mensajes_url}}" class="nav-link">Mensajes Masivos</a>
+
+            {% endif %}
          </div>
 
          <div class="navbar-nav ms-auto">
@@ -46,7 +52,7 @@
                      <input class="form-control me-2"type="search" aria-label="Search" name="searched">
                      <select name="filtro" class="form-select">
                         <option value="nombre">Nombre</option>
-                        <option value="administrador">Administrador</option>
+                        <option value="nit">NIT</option>
                      </select>
                   {% elif request.path == inventario_url%}
                      <form class="d-flex" role="search" method="post" action="{{inventario_url}}">

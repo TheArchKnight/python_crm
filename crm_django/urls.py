@@ -15,6 +15,7 @@ urlpatterns = [
     path("fachadas/", include('fachadas.urls', namespace='fachadas')),
     path("inventario/", include("inventario.urls", namespace="inventario")),
     path("creaciones_generales/", include("general_usage.urls", namespace="general_usage")),
+    path("mensajes_masivos/", include("mensajes_masivos.urls", namespace="mensajes_masivos")),
     path("", LandingPageView.as_view(), name="landing-page" ),
     path("signup", SingupView.as_view(), name="signup"),
     path("logout", LogoutView.as_view(), name="logout"),

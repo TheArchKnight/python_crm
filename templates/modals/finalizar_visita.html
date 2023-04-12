@@ -11,9 +11,7 @@
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            {% with pk as visita_pk%}
-               <a href="{% url 'clientes:finalizar-visita' visita_pk %}" class="btn btn-success">Finalizar</a>
-            {% endwith %}
+               <a class="btn btn-success" id="link-finalizar">Finalizar</a>
          </div>
       </div>
    </div>

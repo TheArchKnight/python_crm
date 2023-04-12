@@ -2,16 +2,15 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from datetime import datetime
-
 class Objeto(models.Model):
 
     #Generic relation https://docs.djangoproject.com/en/4.1/ref/contrib/contenttypes/#generic-relations
     #Points to the event from where the subelement is asked
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.PositiveIntegerField(null=True)
     ubicacion = GenericForeignKey('content_type', 'object_id')
-    fecha = models.DateTimeField(default=datetime.today())
+    fecha = models.DateTimeField(default=datetime.now, blank=True)
     usuario = models.ForeignKey("clientes.User", on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -38,6 +37,9 @@ class Pedido(models.Model):
 
 class Archivo(Objeto):
     nombre = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.nombre}"
 
 class Grupo_Pedido(Objeto):
     CHOICES_ESTADO = (("EN PROCESO", "En proceso"), ("FINALIZADO", "Finalizado")) 

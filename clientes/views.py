@@ -35,6 +35,10 @@ class SingupView(CreateView):
             form.instance.is_organisor = False
         form.save()
         return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"previous":self.get_success_url()})
+        return context
 
 class LandingPageView(LoginView):
     form_class = LoginForm  
@@ -47,6 +51,8 @@ class LandingPageView(LoginView):
                 return redirect("fachadas:lista-obra")
             elif request.user.fumigacion:
                 return redirect("clientes:lista-cliente")
+            elif request.user.mensajes:
+                return redirect("mensajes_masivos:lista-mensajes")
         return super(LandingPageView, self).get(request, *args, **kwargs)
 
 class ClienteListView( EmpleadoRequiredMixin ,ListView):
@@ -61,8 +67,8 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
         clientes = []
         if filtro == "nombre":
             clientes = self.object_list.filter(nombre_orgnanizacion__icontains=searched)
-        elif filtro == "administrador":
-            clientes = self.object_list.filter(administrador__icontains=searched)
+        elif filtro == "nit":
+            clientes = self.object_list.filter(nit__icontains=searched)
         context = {"clientes":clientes}
         return super(ClienteListView, self,).render_to_response(context)
 
@@ -296,6 +302,9 @@ def finalizar_visita(request, pk):
 def finalizar_llamada(request, pk):
     llamada = Llamada.objects.get(id=pk)
     llamada.estado = "FINALIZADA"
+    llamada.observaciones = llamada.observaciones + ' -' + llamada.estado
+    llamada.cliente.rechazos = 0
+    llamada.cliente.save()
     llamada.save()
     return redirect(reverse("clientes:detalles-cliente", args=[llamada.cliente.id]))
 
@@ -307,7 +316,8 @@ def rechazo_cliente(request, cliente_pk, interaccion_pk):
     #ser un cliente INACTIVO
     if cliente.rechazos < 3:
         fecha = date.today() + rd.relativedelta(days=15)
-        Llamada.objects.create(fecha = fecha, cliente=cliente, observaciones=llamada.observaciones)
+        observaciones = llamada.observaciones + ' - RECHAZADA'
+        Llamada.objects.create(fecha = fecha, cliente=cliente, observaciones=observaciones)
     else:
         cliente.estado = "INACTIVO"
 

@@ -250,12 +250,4 @@ class PagoDeleteView(EmpleadoRequiredMixin, DeleteView):
         success_url = str(reverse('fachadas:filtrar-pagos', args=[self.kwargs["obra_pk"], self.kwargs["inicio_pago"], self.kwargs["final_pago"]]))
         return success_url
 
-def subir_archivo(request, obra_pk, año_mes, dia):
-    obra = Obra.objects.get(id=obra_pk)
-    files = request.FILES.getlist("files")
-    path = f"{CARPETA_FACHADAS}{obra.nombre_obra}/{año_mes}/{dia}"
-    write_file(files, path)
-    return redirect(reverse("fachadas:detalles-obra", args=[obra_pk, año_mes, dia]))
-
-
 

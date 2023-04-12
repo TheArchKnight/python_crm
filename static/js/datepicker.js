@@ -1,4 +1,4 @@
-function getEventsOnDate(date, events, element_id){
+function getEventsOnDate(date, events, element_id, clear=false){
 
    var elementos_html = []
    for(var i = 0; i < events.length; i++){
@@ -6,7 +6,7 @@ function getEventsOnDate(date, events, element_id){
          elementos_html.push(`<li>${events[i].cliente__nombre_orgnanizacion}, ${events[i].fecha}</li>`)
       }
    }
-   if(elementos_html.length > 0){
+   if(elementos_html.length > 0 && clear==false){
       $(element_id).html(
          `Elegiste una fecha en la cual ya se encuentran programadas otras visitas:${elementos_html}` );
    }
@@ -37,7 +37,7 @@ function datepicker(){
    const visitas_vigentes = JSON.parse(data.visitas);
    const name = data.nombre
    currentDate = getRecentEvent(visitas_vigentes, name) 
-
+   var fecha_general;
    $('.datepicker').datepicker
    ({
       format: 'yyyy-mm-dd',
@@ -54,9 +54,26 @@ function datepicker(){
    });
 
    $("#id_fecha").change(function(){
-      var fecha = $("#id_fecha").val()
-      getEventsOnDate(fecha, visitas_vigentes, "#fecha_repetida_form")
+      fecha_general = $("#id_fecha").val()
+      tipo = document.getElementById("id_tipo").value;
+      console.log(tipo)
+      if(tipo == "VISITA"){
+         getEventsOnDate(fecha_general, visitas_vigentes, "#fecha_repetida_form")
+      }
    });
+
+   var tipo_select = document.getElementById("id_tipo");
+   tipo_select.addEventListener('change',(event) =>{
+      if(tipo_select.value == "VISITA"){
+         getEventsOnDate(fecha_general, visitas_vigentes, "#fecha_repetida_form");
+      }
+      else{
+         getEventsOnDate(fecha_general, visitas_vigentes, "#fecha_repetida_form", true)
+      }
+   });
+
+
+
 }
 
 

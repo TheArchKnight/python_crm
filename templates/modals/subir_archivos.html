@@ -7,7 +7,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
          </div>
          <div class="modal-body text-center">
-            <form action="{{link}}" method="post" enctype="multipart/form-data" name="subir" id="subir">
+            <form method="post" enctype="multipart/form-data" name="subir" id="subir">
                {% csrf_token %}
                Seleccione los archivos que desea subir: <input type="file" name="files" multiple="multiple">
                <input type="date" name="fecha" value="{{dict_fecha.año_mes}}-{{dict_fecha.dia}}" hidden>
