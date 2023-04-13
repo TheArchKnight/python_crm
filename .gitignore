@@ -2,4 +2,7 @@ env/
 env.bak/
 crm_django/db.sqlite3
 static/img/
-crm_django/.env
+settings/.env
+dump.rdb
+celerybeat-schedule
+__pycache__
