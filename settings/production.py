@@ -24,31 +24,31 @@ CELERY_RESULT_BACKEND = f"db+mysql://{env('DB_USER_PRODUCTION')}:{env('DB_PASSWO
 
 # Configuración de seguridad de cookies
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # Configuración de seguridad de autenticación
-PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-]
-# Configuración de seguridad de logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django.security': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-        },
-    },
-}
+#PASSWORD_HASHERS = [
+#    'django.contrib.auth.hashers.Argon2PasswordHasher',
+#    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+#    'django.contrib.auth.hashers.BCryptPasswordHasher',
+#    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+#]
+## Configuración de seguridad de logging
+#LOGGING = {
+#    'version': 1,
+#    'disable_existing_loggers': False,
+#    'handlers': {
+#        'console': {
+#            'class': 'logging.StreamHandler',
+#        },
+#    },
+#    'loggers': {
+#        'django.security': {
+#            'handlers': ['console'],
+#            'level': 'WARNING',
+#        },
+#    },
+#}
