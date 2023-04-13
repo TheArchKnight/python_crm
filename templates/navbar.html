@@ -20,8 +20,8 @@
          <div class="navbar-nav">
             <img src="{% static 'img/logo-doctor-clean.png' %}" class="logo">
             {% if request.user.is_authenticated%}
-               {% if request.user.fumigacion %}
-                  <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Fumigacion</a>  
+               {% if request.user.clientes %}
+                  <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a>  
                {% endif %}
                {% if request.user.fachadas%}
                   <a class="nav-link " href="{% url 'fachadas:lista-obra' %}">Fachadas</a> 

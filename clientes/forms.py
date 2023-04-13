@@ -105,10 +105,10 @@ class CustomUserCreationForm(UserCreationForm):
  
     class Meta:
         model = User
-        fields=("username", "fumigacion", "mensajes", "email")
+        fields=("username", "clientes", "email")
         field_classes = {"username": CustomUserNameField}
         labels = {
-                "fumigacion": "Clientes",
+                "clientes": "Clientes",
                 "fachadas": "Fachadas",
                 "inventario": "Inventario",
                 "username": "Nombre de usuario"

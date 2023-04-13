@@ -31,7 +31,7 @@ class SingupView(CreateView):
     def get_success_url(self):
         return reverse("landing-page")
     def form_valid(self,form):
-        if form.instance.fumigacion or form.instance.inventario or form.instance.fachadas:
+        if form.instance.clientes or form.instance.inventario or form.instance.fachadas:
             form.instance.is_organisor = False
         form.save()
         return super().form_valid(form)
@@ -49,7 +49,7 @@ class LandingPageView(LoginView):
         if request.user.is_authenticated:
             if request.user.fachadas:
                 return redirect("fachadas:lista-obra")
-            elif request.user.fumigacion:
+            elif request.user.clientes:
                 return redirect("clientes:lista-cliente")
             elif request.user.mensajes:
                 return redirect("mensajes_masivos:lista-mensajes")

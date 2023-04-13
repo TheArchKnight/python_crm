@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractUser
 #to this class
 class User(AbstractUser):
     is_organisor = models.BooleanField(default=False)
-    fumigacion = models.BooleanField(default=False)
+    clientes = models.BooleanField(default=False)
     inventario = models.BooleanField(default=False)
     fachadas = models.BooleanField(default=False)
     mensajes = models.BooleanField(default=False)
@@ -95,7 +95,7 @@ class Llamada(Interaccion):
 def post_user_created_signal(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
-        if instance.fumigacion or instance.fachadas or instance.inventario:
+        if instance.clientes or instance.fachadas or instance.inventario:
             Empleado.objects.create(user=instance, organisation = UserProfile.objects.get(user = instance))
 
 post_save.connect(post_user_created_signal, sender=User)

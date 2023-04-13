@@ -35,7 +35,7 @@ INSTALLED_APPS = [
         "inventario",
         "fachadas",
         "general_usage",
-        "mensajes_masivos"
+#        "mensajes_masivos"
         ]
 
 MIDDLEWARE = [
