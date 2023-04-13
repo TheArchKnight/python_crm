@@ -1,7 +1,6 @@
 import environ
 from pathlib import Path
 
-#from django.conf.global_settings import EMAIL_BACKEND, EMAIL_HOST, EMAIL_HOST_PASSWORD, EMAIL_HOST_USER, EMAIL_PORT, EMAIL_USE_TLS, LOGIN_REDIRECT_URL, LOGIN_URL, LOGOUT_REDIRECT_URL
 
 from celery.schedules import crontab
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
