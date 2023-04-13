@@ -2,7 +2,7 @@ from .base import *
 
 SECRET_KEY = env('SECRET_KEY_PRODUCTION')
 DEBUG = False
-ALLOWED_HOSTS = ['192.168.0.119', '10.0.0.1']
+ALLOWED_HOSTS = ['192.168.0.119', '10.0.0.1', '127.0.0.1']
 
 DATABASES = {
         "default": {
