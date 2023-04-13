@@ -1,7 +1,5 @@
 from datetime import date, datetime
 from django import forms
-from django.db.models.expressions import NoneType
-from django.forms import DateField, DateInput, PasswordInput, widgets
 from .models import Cliente, Empleado, Interaccion, User, Visita
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField, password_validation
 from datetime import timedelta
