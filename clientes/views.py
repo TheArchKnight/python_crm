@@ -21,7 +21,7 @@ from .forms import *
 import os
 import json
 
-CARPETA_FUMIGACION = "/home/anorak/Test/Fumigacion/"
+CARPETA_FUMIGACION = "/mnt/INFO_VARIA/CLIENTES"
 
 
 class SingupView(CreateView):
@@ -180,7 +180,7 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
 class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
     template_name = "clientes/actualizar_cliente.html"
     queryset = Cliente.objects.all()
-    form_class = ClienteModelForm
+    form_class = ClienteModelFormUpdate
 
     def get_success_url(self):
         #The details-client function receives 2 arguments: request and the pk.

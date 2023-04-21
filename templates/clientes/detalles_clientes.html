@@ -78,7 +78,7 @@
                   </thead>
 
                   <tbody>                     
-                     {% for interaccion, tipo, visibilidad in interacciones_cliente%}
+                     {% for interaccion, tipo, visibilidad1 in interacciones_cliente%}
                         <tr>
                            <td class="column"><a href="{% url 'general_usage:lista-objetos' 'interaccion' interaccion.fecha interaccion.pk %}">{{interaccion.fecha}}</a></td>
 

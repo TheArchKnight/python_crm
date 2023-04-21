@@ -8,7 +8,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('fumigacion/', include('clientes.urls', namespace='clientes')),
+    path('Clientes/', include('clientes.urls', namespace='clientes')),
     #path("visitas/", include("visitas.urls", namespace="visitas")),
     path("empleados/", include("empleados.urls", namespace="empleados")),
     path("fachadas/", include('fachadas.urls', namespace='fachadas')),

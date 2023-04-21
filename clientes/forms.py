@@ -62,7 +62,7 @@ class ClienteModelForm(forms.ModelForm):
                 }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", 0)
-        super(ClienteModelForm, self).__init__( *args, **kwargs)
+        super().__init__( *args, **kwargs)
         
         #Verify priviliges to assign clients to certain agents
         if user.is_organisor:
@@ -71,7 +71,34 @@ class ClienteModelForm(forms.ModelForm):
             choices.insert(0, [None, "---"])
             self.fields["empleado_field"] = forms.ChoiceField(label="empleado", choices=choices)
               
-            
+class ClienteModelFormUpdate(ClienteModelForm):
+    class Meta:
+        model = Cliente
+        fields = (
+                'nombre_orgnanizacion',
+                'direccion',
+                'nit',
+                "administrador",
+                'telefono',
+                'correo',
+                'supervisor',
+                'telefono_supervisor',
+                'correo_supervisor',
+                'frecuencia_meses',
+                )
+        widgets = {
+                'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
+                'direccion': forms.TextInput(attrs={"class":'form-control'}),
+                'nit': forms.TextInput(attrs={"class":'form-control'}),
+                'correo': forms.EmailInput(attrs={"class":'form-control'}),
+                'frecuencia_meses': forms.NumberInput(attrs={"class":'form-control'}),
+                "administrador":forms.TextInput(attrs={"class":'form-control'}),
+                "telefono":forms.NumberInput(attrs={"class":'form-control'}),
+                "supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                "telefono_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                "correo_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                }
+
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
     nombre_orgnanizacion = forms.CharField()
