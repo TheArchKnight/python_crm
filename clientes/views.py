@@ -8,7 +8,7 @@ from django.shortcuts import HttpResponse, redirect, render
 
 
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, FormView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 from clientes.functions import *
 from clientes.mixins import EmpleadoRequiredMixin
 from functions import *
@@ -143,7 +143,19 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
    
 
         return super().form_valid(form)
-        
+
+class ClienteDetail2View(EmpleadoRequiredMixin, DetailView):
+    template_name="clientes/detalles_cliente2.html"
+    model=Cliente
+    context_object_name="cliente"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "previous": reverse("clientes:detalles-cliente", args=[self.kwargs["pk"]])
+            })
+        return context
+
 class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
     template_name = "clientes/crear_cliente.html"
     form_class=ClienteModelForm

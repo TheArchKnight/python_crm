@@ -7,8 +7,11 @@
    <div class="row">
       <div class="col-md-3 info-parent"> 
          <div class="row text-center info-cliente" >
-
-            <h1>{{cliente}}</h1>
+            <h1>
+               <a href="{% url 'clientes:detalles-cliente2' cliente.pk %}">
+                  {{cliente}}
+               </a>
+            </h1>
             <h3>{{cliente.direccion}}</h3>
             <h5>Estado del cliente: {{cliente.estado}}</h5>
 
