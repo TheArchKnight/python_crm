@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 # Configurar el entorno de Django
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.development'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings.production'
 import django
 django.setup()
 from clientes.models import Cliente
