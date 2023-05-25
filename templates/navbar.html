@@ -53,6 +53,7 @@
                      <select name="filtro" class="form-select">
                         <option value="nombre">Nombre</option>
                         <option value="nit">NIT</option>
+                        <option value="administrador">Administrador</option>
                      </select>
                   {% elif request.path == inventario_url%}
                      <form class="d-flex" role="search" method="post" action="{{inventario_url}}">
