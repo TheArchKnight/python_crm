@@ -43,6 +43,7 @@ class ClienteModelForm(forms.ModelForm):
                 'telefono_supervisor',
                 'correo_supervisor',
                 'frecuencia_meses',
+                'apartamentos',
                 "estado"
                 )
         widgets = {
@@ -57,6 +58,8 @@ class ClienteModelForm(forms.ModelForm):
                 "supervisor": forms.TextInput(attrs={"class":"form-control"}),
                 "telefono_supervisor": forms.TextInput(attrs={"class":"form-control"}),
                 "correo_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                'apartamentos': forms.TextInput(attrs={"class":'form-control'}),
+
 
 
                 }
@@ -70,6 +73,9 @@ class ClienteModelForm(forms.ModelForm):
             choices = [[i,i] for i in queryset]
             choices.insert(0, [None, "---"])
             self.fields["empleado_field"] = forms.ChoiceField(label="empleado", choices=choices)
+        self.fields['correo'].required = False
+        self.fields['correo_supervisor'].required = False
+
               
 class ClienteModelFormUpdate(ClienteModelForm):
     class Meta:
@@ -84,6 +90,7 @@ class ClienteModelFormUpdate(ClienteModelForm):
                 'supervisor',
                 'telefono_supervisor',
                 'correo_supervisor',
+                'apartamentos',
                 'frecuencia_meses',
                 )
         widgets = {
@@ -97,7 +104,14 @@ class ClienteModelFormUpdate(ClienteModelForm):
                 "supervisor": forms.TextInput(attrs={"class":"form-control"}),
                 "telefono_supervisor": forms.TextInput(attrs={"class":"form-control"}),
                 "correo_supervisor": forms.TextInput(attrs={"class":"form-control"}),
+                'apartamentos': forms.TextInput(attrs={"class":'form-control'}),
+
                 }
+        def __init__(self, *args, **kwargs):
+            super().__init__( *args, **kwargs) 
+            self.fields['correo'].required = False
+            self.fields['correo_supervisor'].required = False
+
 
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
@@ -152,4 +166,3 @@ class LoginForm(AuthenticationForm):
             strip=False,
             widget=forms.PasswordInput(attrs={"autocomplete": "current-password", "class": "form-control"}),
             )
-

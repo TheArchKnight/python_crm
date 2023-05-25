@@ -222,8 +222,10 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         src = os.path.join(CARPETA_FUMIGACION, self.get_object().nombre_orgnanizacion)
         dst = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
-        os.rename(src, dst)
-
+        try:
+            os.rename(src, dst)
+        except:
+            pass
         return super(ClienteUpdateView, self).form_valid(form) 
 
 
