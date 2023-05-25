@@ -69,6 +69,8 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
             clientes = self.object_list.filter(nombre_orgnanizacion__icontains=searched)
         elif filtro == "nit":
             clientes = self.object_list.filter(nit__icontains=searched)
+        elif filtro == "administrador":
+            clientes = self.object_list.filter(administrador__icontains=searched)
         context = {"clientes":clientes}
         return super(ClienteListView, self,).render_to_response(context)
 

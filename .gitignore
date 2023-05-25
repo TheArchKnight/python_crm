@@ -6,3 +6,5 @@ settings/.env
 dump.rdb
 celerybeat-schedule
 __pycache__
+.venv/
+crm_django/settings/.env
