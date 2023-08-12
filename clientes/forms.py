@@ -113,6 +113,7 @@ class ClienteModelFormUpdate(ClienteModelForm):
             self.fields['correo_supervisor'].required = False
 
 
+
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
     nombre_orgnanizacion = forms.CharField()
