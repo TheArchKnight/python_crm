@@ -1,0 +1,26 @@
+<!-- Modal reprogramar visita-->
+<div class="modal fade" id="modalReprogramarVisita" tabindex="-1" aria-labelledby="modalReprogramarVisitaLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="modalReprogramarVisitaLabel">Reprogramar Visita</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body text-center">
+            <form  method="post" name="reprogramar" id="reprogramar">
+               {% csrf_token %}
+               Ingrese la nueva fecha: <input data-provide="datepicker" class="datepicker"  name="nueva_fecha" size="8">       
+            </form>
+            <div id="fecha_repetida"></div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+            <button type="submit" form="reprogramar" class="btn btn-success">Reprogramar</button>
+
+         </div>
+      </div>
+   </div>
+</div>
+
+

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+   <div class="d-flex flex-column justify-content-center align-align-items-center col-4 mx-auto" style="" >
+   {% load static %}
+      <img src=" {% static 'img/logo-doctor-clean.png' %}" alt="">
+      <form action="" method="post">
+         {% csrf_token %}
+         {{form.as_p}}
+        <div class="mx-auto col-2"> <button type="submit" class="btn btn-success">Iniciar Sesion</button></div>
+      </form>
+
+
+   </div>
+
+
+
+  {% endblock content %}
+

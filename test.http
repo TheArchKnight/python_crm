@@ -1,0 +1,20 @@
+POST http://127.0.0.1:8000/signup-api
+Content-Type: application/json
+
+{
+   "username": "anorak", 
+   "password": "anorak2801", 
+   "email": "theanorak@protonmail.com"
+}
+
+POST http://127.0.0.1:8000/login-api
+Content-Type: application/json
+
+{
+   "username": "anorak", 
+   "password": "anorak2801"
+}
+
+GET http://127.0.0.1:8000/clientes-api
+Content-Type: application/json
+Authorization: Token 404934dde80cce4bdc77a43d66c90d7d2274f0c7

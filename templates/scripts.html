@@ -1,0 +1,31 @@
+{% load static %}
+
+<script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'node_modules/jquery/dist/jquery.js' %}"></script>
+<!--Obligatorio que la libreria datepicker este en el footer justo despues de los js de bootstrap para no causar conflicto-->
+<script src="{% static 'node_modules/bootstrap-datepicker/js/bootstrap-datepicker.min.js' %}"></script>
+<script src="{% static 'node_modules/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js' %}"></script>
+
+<script src="{% static 'js/filter.js' %}">
+   getUniqueValuesFromColumn()
+</script>
+
+<script src="{% static 'js/datepicker.js' %}">
+</script>
+
+<script src="{% static 'js/form.js' %}">
+   start_form()
+</script>
+
+<script src="{% static 'js/load_data.js' %}">
+
+</script>
+
+
+<script src="{% static 'js/functions.js' %}"></script>
+<script data-visitas="{{visitas_vigentes}}" data-nombre="{{cliente.nombre_orgnanizacion}}">
+   getUniqueValuesFromColumn()
+   datepicker()
+ 
+</script>
+

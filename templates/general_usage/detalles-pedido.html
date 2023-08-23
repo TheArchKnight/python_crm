@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   {% include 'modals/envio_form.html' %}
+   <div class="text-center">
+      <h1>Elementos del pedido</h1>
+      <h3>Enviado por: {{grupo_pedido.usuario}}</h3>
+      <h3>Fecha: {{grupo_pedido.fecha | date:"d/m/Y-G:i"}}</h3>
+
+
+   </div>
+   <table class="table sticky" id="clientes-table">
+
+      
+      <thead>
+         <th col-index=1>Codigo general</th>
+         <th col-index=2>Descripcion</th>
+         <th col-index=3>Categoria
+            <select class="table-filter form-select text-center" onchange="filter_rows()">
+               <option value="all">Todos</option>
+            </select>
+
+         </th>
+         <th>Codigo unico</th>
+         <th>Marca</th>
+         <th>Cantidad</th>
+         <th>Cantidad despachada</th>
+      </thead>
+      <form method="post" id="pedidoForm">
+         {% csrf_token %}
+         <tbody>
+            {% for elemento, form in elementos_pedido  %}
+               <tr>
+                  <td>{{elemento.elemento.codigo_general}}</td>
+                  <td>{{elemento.elemento.descripcion}}</td> 
+                  <td>{{elemento.elemento.categoria}}</td>
+                  <td>{{elemento.subelemento.codigo_unico}}</td>
+                  <td>{{elemento.subelemento.marca}}</td>
+                  <td>{{elemento.cantidad_pedida}}</td>
+                  <td>{{form.cantidad_enviada}}</td>
+               </tr>
+            {% endfor %}
+         </tbody>
+      </form> 
+   </table>
+   <div class="text-center">
+ <button title="Enviar pedido" type="button" class="btn btn-success" style="" data-bs-toggle="modal" data-bs-target="#modalEnvioForm">Enviar</button>
+
+
+   </div>
+  {% endblock content %}

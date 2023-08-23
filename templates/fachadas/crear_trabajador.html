@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+   <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4 my-5">
+         <h1>Añadir trabajador</h1>
+         <form method="post">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit" class="btn btn-success">Guardar</button>
+         </form>
+
+      </div>
+   </div>
+{% endblock content %}
+
+
+

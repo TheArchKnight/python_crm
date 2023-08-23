@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+   <a href="{% url 'clientes:detalles-cliente' cliente.pk  %}">Volver a {{cliente}}</a>
+   <hr/>
+<h1>Registro de nueva visita</h1>
+<form method="post">
+   {% csrf_token %}
+   {{form}}
+   <button type="submit">Guardar</button>
+</form>
+
+{% endblock content %}
