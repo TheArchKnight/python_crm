@@ -30,6 +30,4 @@ def signup(request):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def test_token(request):
-    return Response({})
+

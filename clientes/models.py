@@ -7,7 +7,7 @@ class Cliente(models.Model):
 
     CHOICES_ESTADO = (("INACTIVO", "Inactivo"), ("POTENCIAL", "Potencial"))
     CHOICES_SERVICIO = (("VENCIDO", "Vencido"), ("GARANTIA", "Garantia"), ("EN TERMINOS", "En terminos"))
-    nombre_orgnanizacion = models.CharField(max_length=150)
+    nombre_organizacion = models.CharField(max_length=150)
     direccion = models.CharField(max_length=255)
     apartamentos = models.CharField(max_length=50)
     nit = models.CharField(max_length=15)
@@ -22,7 +22,7 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=30)
     estado = models.CharField(max_length=20, choices = CHOICES_ESTADO)
     rechazos = models.IntegerField(default=0, null=False)
-    estado_servicio = models.CharField(max_length=15, choices=CHOICES_SERVICIO)
+    estado_servicio = models.CharField(max_length=15, choices=CHOICES_SERVICIO, blank=True)
     def __str__(self):
         return f"{self.nombre_orgnanizacion}"
   

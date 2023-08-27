@@ -6,6 +6,6 @@ from rest_framework.permissions import IsAuthenticated
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
-        fields = ["nombre_orgnanizacion", "nit"]
+        fields = '__all__'
         authentication_classes = [SessionAuthentication]
         permission_classes = [IsAuthenticated]

@@ -39,7 +39,4 @@ urlpatterns += [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path('login-api', login),
     re_path('signup-api', signup),
-    re_path('test_token', test_token)
-
-
 ]

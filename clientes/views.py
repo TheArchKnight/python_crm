@@ -66,7 +66,7 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
         filtro = request.POST["filtro"]
         clientes = []
         if filtro == "nombre":
-            clientes = self.object_list.filter(nombre_orgnanizacion__icontains=searched)
+            clientes = self.object_list.filter(nombre_organizacion__icontains=searched)
         elif filtro == "nit":
             clientes = self.object_list.filter(nit__icontains=searched)
         elif filtro == "administrador":
@@ -96,7 +96,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         visibilidades = ["disabled" if i.fecha > date.today() else "" for i in interacciones_cliente]
         interacciones_cliente = zip(interacciones_cliente, tipos, visibilidades)
         
-        visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_orgnanizacion")
+        visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_organizacion")
 #        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_vigentes]
         for i in visitas_vigentes:
             i["fecha"] = i["fecha"].strftime("%Y-%m-%d")
@@ -134,7 +134,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
             
-            ruta = os.path.join(CARPETA_FUMIGACION, cliente.nombre_orgnanizacion, carpeta)
+            ruta = os.path.join(CARPETA_FUMIGACION, cliente.nombre_organizacion, carpeta)
             create_folder(ruta)
             if cliente.estado == "INACTIVO":
                 cliente.estado = "ACTIVO"
@@ -185,7 +185,7 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
         else:
             form.instance.empleado = Empleado.objects.get(user = self.request.user)
-        ruta = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
+        ruta = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_organizacion)
         create_folder(ruta)
         
     
@@ -220,8 +220,8 @@ class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
         if self.request.user.is_organisor:
             empleado_username = form.cleaned_data["empleado_field"]
             form.instance.empleado = Empleado.objects.get(user__username = empleado_username)
-        src = os.path.join(CARPETA_FUMIGACION, self.get_object().nombre_orgnanizacion)
-        dst = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_orgnanizacion)
+        src = os.path.join(CARPETA_FUMIGACION, self.get_object().nombre_organizacion)
+        dst = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_organizacion)
         try:
             os.rename(src, dst)
         except:
@@ -236,7 +236,7 @@ class ClienteDeleteView(EmpleadoRequiredMixin, DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         instance = Cliente.objects.get(id=self.kwargs["pk"])
-        carpeta = os.path.join(CARPETA_FUMIGACION, instance.nombre_orgnanizacion)
+        carpeta = os.path.join(CARPETA_FUMIGACION, instance.nombre_organizacion)
         try:
             rmtree(carpeta)
         except:
@@ -292,7 +292,7 @@ class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
 #def search_clientes(request):
 #    if request.method == "POST":
 #        searched = request.POST["searched"]
-#        clientes = Cliente.objects.filter(nombre_orgnanizacion__icontains=searched)
+#        clientes = Cliente.objects.filter(nombre_organizacion__icontains=searched)
 #        return render(request, "search_clientes.html", {"searched": searched, "clientes": clientes})
 #    else:
 #        return render(request, "search_clientes.html", {})
@@ -345,7 +345,7 @@ def rechazo_cliente(request, cliente_pk, interaccion_pk):
 def reprogramar_visita(request, pk):
     visita = Visita.objects.get(id=pk)
     if request.method == "POST":
-        carpeta_cliente = os.path.join(CARPETA_FUMIGACION, visita.cliente.nombre_orgnanizacion)
+        carpeta_cliente = os.path.join(CARPETA_FUMIGACION, visita.cliente.nombre_organizacion)
         src = os.path.join(carpeta_cliente, visita.fecha.strftime("%Y-%m-%d"))
         nueva_fecha = request.POST["nueva_fecha"]
         visita.fecha = nueva_fecha
@@ -359,7 +359,7 @@ def reprogramar_visita(request, pk):
 #    visita = Visita.objects.get(id=interaccion_pk)
 #    cliente = Cliente.objects.get(id=cliente_pk)
 #    files = request.FILES.getlist("files")
-#    path = f"{CARPETA_FUMIGACION}/{cliente.nombre_orgnanizacion}/{visita.fecha}"
+#    path = f"{CARPETA_FUMIGACION}/{cliente.nombre_organizacion}/{visita.fecha}"
 #    write_file(files, path)
 #    return redirect(reverse("clientes:detalles-cliente", args=[cliente.id]))
 #

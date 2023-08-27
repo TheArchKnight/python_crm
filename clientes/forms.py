@@ -33,7 +33,7 @@ class ClienteModelForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = (
-                'nombre_orgnanizacion',
+                'nombre_organizacion',
                 'direccion',
                 'nit',
                 "administrador",
@@ -47,7 +47,7 @@ class ClienteModelForm(forms.ModelForm):
                 "estado"
                 )
         widgets = {
-                'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
+                'nombre_organizacion': forms.TextInput(attrs={"class":'form-control'}),
                 'direccion': forms.TextInput(attrs={"class":'form-control'}),
                 'nit': forms.TextInput(attrs={"class":'form-control'}),
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
@@ -81,7 +81,7 @@ class ClienteModelFormUpdate(ClienteModelForm):
     class Meta:
         model = Cliente
         fields = (
-                'nombre_orgnanizacion',
+                'nombre_organizacion',
                 'direccion',
                 'nit',
                 "administrador",
@@ -94,7 +94,7 @@ class ClienteModelFormUpdate(ClienteModelForm):
                 'frecuencia_meses',
                 )
         widgets = {
-                'nombre_orgnanizacion': forms.TextInput(attrs={"class":'form-control'}),
+                'nombre_organizacion': forms.TextInput(attrs={"class":'form-control'}),
                 'direccion': forms.TextInput(attrs={"class":'form-control'}),
                 'nit': forms.TextInput(attrs={"class":'form-control'}),
                 'correo': forms.EmailInput(attrs={"class":'form-control'}),
@@ -116,7 +116,7 @@ class ClienteModelFormUpdate(ClienteModelForm):
 
 #Deprecated in favor of ClienteModelForm
 class ClienteForm(forms.Form):
-    nombre_orgnanizacion = forms.CharField()
+    nombre_organizacion = forms.CharField()
     direccion = forms.CharField()
     nit = forms.IntegerField()
     email = forms.EmailField()
