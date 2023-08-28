@@ -14,11 +14,4 @@ class User(AbstractUser):
     mensajes = models.BooleanField(default=False)
     email = models.EmailField(null=False)
 
-#Users can belong to diferent profiles. For example, working on diferent 
-#fields on the same company
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-     
-    def __str__(self):
-        return self.user.username
-# Create your models here.
+

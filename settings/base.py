@@ -32,8 +32,7 @@ INSTALLED_APPS = [
 
         "clientes",
         "authentication",
-        "empleados",
-        "inventario",
+       "inventario",
         "fachadas",
         "general_usage",
         "rest_framework",

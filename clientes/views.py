@@ -9,6 +9,7 @@ from django.shortcuts import HttpResponse, redirect, render
 
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
+from rest_framework.decorators import api_view
 from clientes.functions import *
 from clientes.mixins import EmpleadoRequiredMixin
 from functions import *
@@ -82,7 +83,7 @@ class ClienteListView( EmpleadoRequiredMixin ,ListView):
 class ClienteDetailView(EmpleadoRequiredMixin, FormView):
     template_name = "clientes/detalles_clientes.html"
     form_class= InteraccionForm
-   
+
     def get_success_url(self):
         #Args receives a list with arguments
         return reverse("clientes:detalles-cliente", args=[self.kwargs['pk']])
@@ -95,7 +96,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
         tipos = [definir_tipos(i) for i in interacciones_cliente]
         visibilidades = ["disabled" if i.fecha > date.today() else "" for i in interacciones_cliente]
         interacciones_cliente = zip(interacciones_cliente, tipos, visibilidades)
-        
+
         visitas_vigentes = Visita.objects.filter(fecha__gte = datetime.today()).values("fecha", "cliente__nombre_organizacion")
 #        fechas_usadas = [i.fecha.strftime("%Y-%m-%d") for i in visitas_vigentes]
         for i in visitas_vigentes:
@@ -133,7 +134,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
             if visitas.count() == 0:
                 cliente.estado = "ACTIVO"
             cliente.rechazos = 0
-            
+
             ruta = os.path.join(CARPETA_FUMIGACION, cliente.nombre_organizacion, carpeta)
             create_folder(ruta)
             if cliente.estado == "INACTIVO":
@@ -142,7 +143,7 @@ class ClienteDetailView(EmpleadoRequiredMixin, FormView):
 
         elif form.cleaned_data["tipo"] == "LLAMADA":
             Llamada.objects.create(fecha=fecha, observaciones=observaciones, cliente=cliente, empleado=empleado)
-   
+
 
         return super().form_valid(form)
 
@@ -164,7 +165,7 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse("clientes:lista-cliente")
-    
+
     def get_form_kwargs(self):
         #pass user instance as an argument for the form
         kwargs = super().get_form_kwargs()
@@ -187,8 +188,8 @@ class ClienteCreateView(EmpleadoRequiredMixin, CreateView):
             form.instance.empleado = Empleado.objects.get(user = self.request.user)
         ruta = os.path.join(CARPETA_FUMIGACION, form.instance.nombre_organizacion)
         create_folder(ruta)
-        
-    
+
+
         return super(ClienteCreateView, self).form_valid(form)
 
 class ClienteUpdateView(EmpleadoRequiredMixin, UpdateView):
@@ -268,9 +269,9 @@ class VisitaUpdateView(EmpleadoRequiredMixin, UpdateView):
 
 
 class VisitaDeleteView(EmpleadoRequiredMixin, DeleteView):
-#    template_name = "visitas/eliminar_visita.html"
+    #    template_name = "visitas/eliminar_visita.html"
 #    queryset = Visita.objects.all()
-   
+
     model = Visita
     http_method_names = ['delete']
 
@@ -308,7 +309,7 @@ def finalizar_visita(request, pk):
         fecha_garantia += timedelta(days=7-fecha_garantia.weekday())
     if cliente.fecha_vencimiento.weekday() > 4:
         cliente.fecha_vencimiento += timedelta(days=7-cliente.fecha_vencimiento.weekday())
-    
+
     Llamada.objects.create(fecha=cliente.fecha_vencimiento, observaciones = "VENCIMIENTO TERMINOS", cliente = cliente)
 
     Llamada.objects.create(fecha=fecha_garantia, observaciones = "SEGUIMIENTO GARANTIA", cliente = cliente)
@@ -352,7 +353,7 @@ def reprogramar_visita(request, pk):
         dst = os.path.join(carpeta_cliente, nueva_fecha)
         os.rename(src, dst)
         visita.save()
-        
+
     return redirect(reverse("clientes:detalles-cliente", args=[visita.cliente.id]))
 
 #def subir_archivo(request, cliente_pk, interaccion_pk):
@@ -415,27 +416,50 @@ def reprogramar_visita(request, pk):
 #        form = VisitaForm(request.POST)
 #        if form.is_valid():
 #            Visita.objects.create(
-#                    fecha = form.cleaned_data["fecha"],
-#                    observaciones = form.cleaned_data["observaciones"],
-#                    cliente = cliente
-#                    )
+        #                    fecha = form.cleaned_data["fecha"],
+        #                    observaciones = form.cleaned_data["observaciones"],
+        #                    cliente = cliente
+        #                    )
 #            return redirect(f"/clientes/{pk}")
 #
 #
 #    return render(request, "clientes/detalles_clientes.html", {
-#           "cliente": cliente,
-#           "visitas": visitas,
-#           "form": form,
-#           })
+    #           "cliente": cliente,
+    #           "visitas": visitas,
+    #           "form": form,
+    #           })
 
 #Django rest viewsets
 
 from rest_framework import viewsets, permissions
 from clientes.serializers import *
+from .models import *
 
 class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class VisitaViewSet(viewsets.ModelViewSet):
+    serializer_class = VisitaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Visita.objects.all()
+        cliente = self.request.query_params.get("customer_id")
+        if cliente:
+            queryset = queryset.filter(cliente__id=cliente)
+        return queryset
+
+
+class LlamadaViewSet(viewsets.ModelViewSet):
+    queryset = Llamada.objects.all()
+    serializer_class = LlamadaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+
+
+
 
 

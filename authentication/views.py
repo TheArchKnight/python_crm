@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from authentication.models import User
 from django.shortcuts import get_object_or_404
-
+from clientes.models import Empleado
 
 @api_view(['POST'])
 def login(request):
@@ -25,6 +25,7 @@ def signup(request):
         user = User.objects.get(username=request.data['username'])
         user.set_password(request.data['password'])
         user.save()
+        Empleado.objects.create(user=user)
         token = Token.objects.create(user=user)
         return Response({"token": token.key, "user": serializer.data})
 

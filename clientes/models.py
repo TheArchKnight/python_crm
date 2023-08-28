@@ -28,7 +28,6 @@ class Cliente(models.Model):
   
 class Empleado(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.user.username
@@ -70,15 +69,4 @@ class Llamada(Interaccion):
         if self.estado=="EN PROCESO":
             self.estado = "PENDIENTE"
 
-#signal to execute when an user is created
-def post_user_created_signal(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-        if instance.clientes or instance.fachadas or instance.inventario:
-            Empleado.objects.create(user=instance, organisation = UserProfile.objects.get(user = instance))
-
-post_save.connect(post_user_created_signal, sender=User)
-
-#def pre_cliente_created_signal(sender, instance, *args, **kwargs):
-#    instance.fecha_vencimiento
 
