@@ -6,5 +6,4 @@ class EmpleadoModelForm(forms.ModelForm):
         model = Empleado
         fields = (
                 "user",
-                "organisation"
                 )

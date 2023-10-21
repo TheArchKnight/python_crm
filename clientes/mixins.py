@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 class EmpleadoRequiredMixin(AccessMixin):
     """Verify the user has acces to the clients app"""
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.clientes:
+        if not request.user.is_authenticated or not (request.user.clientes or request.user.is_organisor):
             return redirect(("landing-page"))
         return super().dispatch(request, *args, **kwargs)
 

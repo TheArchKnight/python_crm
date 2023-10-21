@@ -1,24 +1,41 @@
 {% extends 'base.html' %}
 
-{% block content %}   <h1 class="text-center">Estos son todos nuestros empleados</h1>
-   <div class="row">
-      <div class="col-md-12">
-         <div class="table-responsive">
-            <table class="table table-striped">
-               <tr>
-                  <td>Usuario</td>
-               </tr>
-               {% for empleado in object_list %}
-                  <tr>
-                     <td> <a href="{% url 'empleados:detalles-empleado' empleado.pk %}">{{empleado.user.username}}</a></td>
-                  </tr>
-               {% endfor %}
-            </table>
-            <hr/>
+{% block content %}  
 
-         >            <a href="{% url 'empleados:crear-empleado' %}">Crear un nuevo empleado</a>
-         </div>
+<div class="row">
+   <div class="col-md-12">
+      <div class="table-responsive">
+         <table class="table table-hover sticky table-striped align-middle" id="clientes-table">
+            <thead>               
+               <th class="text-center" col-index=1>Nombre Empleado</th>
+               <th class="text-center" col-index=1>Fecha de ultimo login</th>
+               <th class="text-center" col-index=1>Ultimo cliente</th>
+               <th class="text-center" col-index=1>Fecha de creacion</th>
+               <th class="text-center" col-index=1>Fecha para ejecucion</th>
+               <th class="text-center" col-index=1>Correo</th>
+
+            </thead>
+            <tbody>             
+               {% for empleado, interaccion in empleados_interacciones %}
+               <tr class="text-center">
+                  <td> <a href="{% url 'empleados:detalles-empleado' empleado.pk %}">{{empleado.user.username}}</a></td>
+                  <td class="text-center">{{empleado.user.last_login|date:"Y-m-d"}} {{empleado.user.last_login|time:"H:i:s"}}</td>
+
+                  <td class="text-center"><a href="{% url 'clientes:detalles-cliente' interaccion.cliente.pk %}">{{interaccion.cliente}}</a></td>
+                  <td class="text-center">{{interaccion.fecha_creacion}}</td>
+
+                  <td class="text-center">{{interaccion.fecha}}</td>
+                  <td class="text-center">{{empleado.user.email}}</td>
+               </tr>
+               {% endfor %}
+            </tbody>
+
+         </table>
+         <hr/>
       </div>
    </div>
+</div>
+
+
 
 {% endblock content %}

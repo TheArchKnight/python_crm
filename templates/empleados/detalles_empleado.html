@@ -1,14 +1,33 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-   <div class="text-center">   <h1>{{empleado.user.username}}</h1>
-   <a href="{% url 'empleados:editar-empleado' empleado.pk %}">Editar</a>
-   <a href="{% url 'empleados:eliminar-empleado' empleado.pk %}">Eliminar</a>
+<div class="text-center">   
+   <h1>{{empleado.user.username}}</h1>
 </div>
 
-   <hr>
-         <a href="{% url 'empleados:lista-empleados' %}">Volver a empleados</a>
+<div class="row">
+   <div class="col-md-12">
+      <div class="table-responsive">
+         <table class="table table-hover sticky table-striped align-middle" id="clientes-table">
+            <thead>               
+               <th class="text-center" col-index=1>Cliente</th>
+               <th class="text-center" col-index=1>Fecha Creacion</th>
+               <th class="text-center" col-index=1>Fecha Programada</th>
+               <th class="text-center" col-index=1>Observaciones</th>
+            </thead>
+            <tbody>             
+               {% for interaccion in interacciones %}
+               <tr class="text-center">
+                  <td class="text-center"><a href="{% url 'clientes:detalles-cliente' interaccion.cliente.pk %}">{{interaccion.cliente}}</a></td>
+                  <td class="text-center">{{interaccion.fecha_creacion}}</td>
+                  <td class="text-center">{{interaccion.fecha}}</td>
+                  <td class="text-center">{{interaccion.observaciones}}</td>
+               </tr>
+               {% endfor %}
+            </tbody>
+         </table>
+         <hr/>
+      </div>
+   </div>
+</div>
 
-      {% endblock content %}
-
+{% endblock content %}

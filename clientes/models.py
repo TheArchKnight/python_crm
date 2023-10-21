@@ -16,15 +16,6 @@ class User(AbstractUser):
     mensajes = models.BooleanField(default=False)
     email = models.EmailField(null=False)
 
-#Users can belong to diferent profiles. For example, working on diferent 
-#fields on the same company
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-     
-    def __str__(self):
-        return self.user.username
-
-
 class Cliente(models.Model):
 
     CHOICES_ESTADO = (("INACTIVO", "Inactivo"), ("POTENCIAL", "Potencial"))
@@ -50,8 +41,7 @@ class Cliente(models.Model):
   
 class Empleado(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-
+    
     def __str__(self):
         return self.user.username
 
@@ -76,11 +66,12 @@ class Empleado(models.Model):
 class Interaccion(models.Model):
     CHOICES_ESTADO = (("FINALIZADA", "Finalizada"), ("EN PROCESO", "En proceso"), ("PENDIENTE", "Pendiente"))
     fecha = models.DateField()
+    fecha_creacion = models.DateField(auto_now_add=True)
     observaciones = models.CharField(max_length=255)
     cliente = models.ForeignKey("clientes.Cliente", on_delete=models.CASCADE)
     estado = models.CharField(max_length=20, choices=CHOICES_ESTADO, default="EN PROCESO")
     empleado = models.ForeignKey("clientes.Empleado", on_delete=models.SET_NULL, null=True)
-
+    
     def __str__(self):
         return f"{self.fecha}"
 
@@ -94,13 +85,8 @@ class Llamada(Interaccion):
 
 #signal to execute when an user is created
 def post_user_created_signal(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
-        if instance.clientes or instance.fachadas or instance.inventario:
-            Empleado.objects.create(user=instance, organisation = UserProfile.objects.get(user = instance))
+    if created and not instance.is_organisor:
+      Empleado.objects.create(user=instance)
 
 post_save.connect(post_user_created_signal, sender=User)
-
-#def pre_cliente_created_signal(sender, instance, *args, **kwargs):
-#    instance.fecha_vencimiento
 

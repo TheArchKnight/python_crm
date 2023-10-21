@@ -23,18 +23,17 @@ import json
 
 CARPETA_FUMIGACION = "/mnt/INFO_VARIA/CLIENTES"
 
-
 class SingupView(CreateView):
     template_name="registration/register.html"
     form_class = CustomUserCreationForm
 
     def get_success_url(self):
         return reverse("landing-page")
-    def form_valid(self,form):
-        if form.instance.clientes or form.instance.inventario or form.instance.fachadas:
-            form.instance.is_organisor = False
-        form.save()
-        return super().form_valid(form)
+#    def form_valid(self,form):
+#        if form.instance.clientes or form.instance.inventario or form.instance.fachadas:
+#            form.instance.is_organisor = False
+#        form.save()
+#        return super().form_valid(form)
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({"previous":self.get_success_url()})
@@ -47,10 +46,12 @@ class LandingPageView(LoginView):
     def get(self, request, *args, **kwargs):
         #Redirect user to the clients app if it's authenticated.
         if request.user.is_authenticated:
-            if request.user.fachadas:
-                return redirect("fachadas:lista-obra")
+            if request.user.is_organisor:
+              return redirect("empleados:lista-empleados" )
             elif request.user.clientes:
                 return redirect("clientes:lista-cliente")
+            elif request.user.fachadas:
+                return redirect("fachadas:lista-obra")
             elif request.user.mensajes:
                 return redirect("mensajes_masivos:lista-mensajes")
         return super(LandingPageView, self).get(request, *args, **kwargs)

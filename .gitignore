@@ -2,9 +2,17 @@ env/
 env.bak/
 crm_django/db.sqlite3
 static/img/
+static/node_modules
+static/django_extensions
+static/admin
+static/package-lock.json
 settings/.env
 dump.rdb
 celerybeat-schedule
 __pycache__
 .venv/
 crm_django/settings/.env
+.direnv/
+.envrc
+pyrightconfig.json
+empleados/.jukit/

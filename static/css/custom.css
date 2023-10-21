@@ -1,0 +1,89 @@
+.info-parent{
+   border: 3px solid grey;
+   height: 100%;
+}
+
+.info-cliente{
+   background-color: grey;
+   padding: 10px;
+}
+.table.sticky{
+   border-collapse: collapse;
+   text-align: center;
+   height: 650px;
+   display: block;
+   overflow-y: auto;
+}
+
+.table.sticky thead{
+   position: sticky;
+   z-index: 1;
+   top: 0;
+   background-color: gray;
+}
+
+.table.sticky td{
+   width: 450px;
+   border-bottom: 1px solid #000;
+}
+
+.column{
+   border-left: 1px solid #000;
+}
+
+.column.rigth{
+   border-right: 1px solid #000;
+}
+
+
+.table.sticky th{
+   width: 450px;
+   border-left: 1px solid #000;
+
+}
+ .table.sticky th:first-child{
+   border-left: none;
+
+ }
+button:disabled {
+   position: static !important;
+}
+
+.span{
+   width: 900px;
+
+}
+
+
+img.logo{
+   padding-left: 10px;
+   width: 120px;
+   height: 40px;
+}
+
+
+table.form{
+   text-align: center;
+   border-collapse: collapse;
+}
+
+table.form th{
+   width: 250px;
+}
+
+table.form input{
+   margin: 0 auto;
+   width: 80px;
+
+}
+
+table.form select{
+   width: 200px;
+}
+
+*, *before, *after{
+   box-sizing: border-box;
+}
+
+
+

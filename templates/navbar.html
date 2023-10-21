@@ -4,12 +4,14 @@
 {% url 'fachadas:lista-obra' as fachadas_url %}
 {% url 'inventario:lista-elementos' as inventario_url %}
 {% url 'mensajes_masivos:lista-mensajes' as mensajes_url%}
+{% url 'mensajes_masivos:lista-mensajes' as mensajes_url%}
+{% url 'empleados:lista-empleados' as empleados_url%}
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" data-bs-theme="dark">
    <div class="container-fluid">
       {% comment "show the back button only no necessary pages." %}{% endcomment %}
-      {% if request.path != landing_url and request.path != lista_url and request.path != fachadas_url and request.path != inventario_url and request.path != mensajes_url %}
-         <button onclick="location.href='{{previous}}'" class="btn btn-secondary" title="Volver a la pagina previa"><i class="bi bi-arrow-left-square"></i></button>
+      {% if request.path != landing_url and request.path != lista_url and request.path != fachadas_url and request.path != inventario_url and request.path != mensajes_url and request.path != empleados_url %}
+      <button onclick="location.href='{{previous}}'" class="btn btn-secondary" title="Volver a la pagina previa"><i class="bi bi-arrow-left-square"></i></button>
       {% endif %}
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,55 +22,62 @@
          <div class="navbar-nav">
             <img src="{% static 'img/logo-doctor-clean.png' %}" class="logo">
             {% if request.user.is_authenticated%}
-               {% if request.user.clientes %}
-                  <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a>  
-               {% endif %}
-               {% if request.user.fachadas%}
-                  <a class="nav-link " href="{% url 'fachadas:lista-obra' %}">Fachadas</a> 
-               {% endif %}
+            {% if request.user.clientes %}
+            <a class="nav-link " href="{% url 'clientes:lista-cliente' %}">Clientes</a>  
+            {% endif %}
+            {% if request.user.fachadas%}
+            <a class="nav-link " href="{% url 'fachadas:lista-obra' %}">Fachadas</a> 
+            {% endif %}
             {% endif %}
             {% if request.user.inventario %}
-               <a class="nav-link " href="{% url 'inventario:lista-elementos' %}">Inventario</a> 
+            <a class="nav-link " href="{% url 'inventario:lista-elementos' %}">Inventario</a> 
             {% endif %}
 
             {% if request.user.is_organisor %}
-               <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
+            <a class="nav-link" href="{% url 'empleados:lista-empleados' %}">Empleados</a>
             {% endif %}
 
             {% if request.user.mensajes %}
-               <a href="{{mensajes_url}}" class="nav-link">Mensajes Masivos</a>
+            <a href="{{mensajes_url}}" class="nav-link">Mensajes Masivos</a>
 
             {% endif %}
          </div>
-
          <div class="navbar-nav ms-auto">
             {% if request.user.is_authenticated %}
-               <span class="navbar-text">Perfil: {{request.user.username}}</span> 
-               <a class ="mx-3  nav-link" href="{% url 'logout' %}">Cerrar sesion</a>
-               {% comment "Navbar button for searching clientes in DB" %}{% endcomment %}
+            <span class="navbar-text">Perfil: {{request.user.username}}</span> 
+            <a class ="mx-3  nav-link" href="{% url 'logout' %}">Cerrar sesion</a>
+            {% comment "Navbar button for searching clientes in DB" %}{% endcomment %}
                {% if request.path == lista_url %}
-                  <form class="d-flex" role="search" method="post" action="{{lista_url}}">
-                     {% csrf_token %}
-                     <input class="form-control me-2"type="search" aria-label="Search" name="searched">
-                     <select name="filtro" class="form-select">
-                        <option value="nombre">Nombre</option>
-                        <option value="nit">NIT</option>
-                        <option value="administrador">Administrador</option>
-                     </select>
-                  {% elif request.path == inventario_url%}
-                     <form class="d-flex" role="search" method="post" action="{{inventario_url}}">
-                     {% csrf_token %}
-                     <input class="form-control me-2"type="search" aria-label="Search" name="searched">
-                        <select name="filtro" class="form-select">
-                           <option value="descripcion">Descripcion</option>
-                           <option value="codigo">Codigo</option>
-                        </select>
-                     {% endif %}
-                     <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-                     </form>
-                  {% else %}
-                     <a class="nav-link" href="{% url 'signup' %}">Registrarse</a>
-                  {% endif %}
+               <form class="d-flex" role="search" method="post" action="{{lista_url}}">
+                  {% csrf_token %}
+                  <input class="form-control me-2"type="search" aria-label="Search" name="searched">
+                  <select name="filtro" class="form-select">
+                     <option value="nombre">Nombre</option>
+                     <option value="nit">NIT</option>
+                     <option value="administrador">Administrador</option>
+                  </select>
+               {% elif request.path == inventario_url%}
+               <form class="d-flex" role="search" method="post" action="{{inventario_url}}">
+                  {% csrf_token %}
+                  <input class="form-control me-2"type="search" aria-label="Search" name="searched">
+                  <select name="filtro" class="form-select">
+                     <option value="descripcion">Descripcion</option>
+                     <option value="codigo">Codigo</option>
+                  </select>
+               {% elif request.path == empleado_detalles%}
+               <form class="d-flex" role="search" method="post" action="{{empleado_detalles}}">
+                  {% csrf_token %}
+                  <input class="form-control me-2"type="search" aria-label="Search" name="searched">
+                  <select name="filtro" class="form-select">
+                     <option value="cliente">Cliente</option>
+                  </select>
+               {% endif %}
+               <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            </form>
+            {% else %}
+               <a class="nav-link" href="{% url 'signup' %}">Registrarse</a>
+            {% endif %}
+
          </div>
       </div>
    </div>
